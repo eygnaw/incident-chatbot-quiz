@@ -1,1 +1,0 @@
-bash\n# on your workstation\nmkdir clinical-governance-quiz\ncd clinical-governance-quiz\ncp /path/to/quiz_with_chatbot.html .\n\n# standard Git dance\ngit init\ngit add quiz_with_chatbot.html\ngit commit -m \"Initial commit – quiz prototype\"\n\ngit branch -M main\n\ngit remote add origin https://github.com/<your‑username>/clinical-governance-quiz.git\ngit push -u origin main\n
