@@ -1,212 +1,195 @@
 <!DOCTYPE html>
-<!--
-  Clinical-Governance Quiz  ·  Single-file front-end
-  ├─ intro.html        – Page 1 content (static HTML)
-  ├─ questions.json    – Page 2 scenarios
-  └─ feedback.json     – Page 4 prompts
-
-  Google Sheets endpoint (Apps Script):
-  https://script.google.com/macros/s/AKfycbzhWALkZL3vWhxfacbEnJNWQ7o4OoJ1ZaPtU-eTniXCBSaey4EG1u_tVbY3ZG8umepF/exec
--->
+<!--  Clinical-Governance Quiz  ·  front-end only
+      Needs intro.html, questions.json, feedback.json in same folder  -->
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clinical Governance Quiz with IDT Chatbot</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinical Governance Quiz</title>
 
-  <!-- Dialogflow CX widget -->
-  <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
-  <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger.js"></script>
+<!-- Dialogflow CX widget assets -->
+<link  rel="stylesheet"
+       href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+<script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger.js"></script>
 
-  <style>
-    body          {font-family:Arial,Helvetica,sans-serif;margin:0;padding:0 380px 0 0;background:#f9fafb;color:#111}
-    h1,h2         {margin-top:0}
-    .container    {max-width:800px;margin:0 auto;padding:2rem}
-    .page         {display:none}
-    .page.active  {display:block}
-    .btn          {display:inline-block;padding:.6rem 1.4rem;background:#1e40af;color:#fff;border:none;border-radius:6px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.15)}
-    .btn:disabled {opacity:.6;cursor:not-allowed}
-    .timer        {font-weight:bold;margin-bottom:1rem}
-    .question     {font-weight:600;margin-bottom:.5rem}
-    .options label{display:block;margin-bottom:.4rem;cursor:pointer}
-    .scroll-area  {max-height:70vh;overflow-y:auto;border:1px solid #ddd;background:#fff;padding:1rem;margin-bottom:1rem;border-radius:6px;box-shadow:inset 0 1px 2px rgba(0,0,0,.05)}
-    table         {border-collapse:collapse;width:100%;margin-bottom:1rem}
-    th,td         {border:1px solid #e5e7eb;padding:.5rem;text-align:center}
-    th            {background:#f3f4f6;font-weight:600}
-    #summaryCard  {background:#fff;border-radius:8px;padding:1rem;box-shadow:0 2px 6px rgba(0,0,0,.08)}
-    #summaryJson  {margin:0;white-space:pre-wrap}
-    df-messenger  {position:fixed;bottom:0;right:0;top:0;width:350px;max-width:100%;--df-messenger-chat-background:#f3f6fc}
-    @media(max-width:900px){body{padding:0}df-messenger{width:100%;height:50%;left:0;right:0;top:auto}}
-  </style>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0 380px 0 0;background:#f9fafb;color:#111}
+h1,h2{margin-top:0}.container{max-width:800px;margin:0 auto;padding:2rem}
+.page{display:none}.page.active{display:block}
+.btn{display:inline-block;padding:.6rem 1.4rem;background:#1e40af;color:#fff;border:none;border-radius:6px;font-weight:600;cursor:pointer}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.timer{font-weight:bold;margin-bottom:1rem}.question{font-weight:600;margin-bottom:.5rem}
+.options label{display:block;margin-bottom:.4rem;cursor:pointer}
+.scroll-area{max-height:70vh;overflow-y:auto;border:1px solid #ddd;background:#fff;padding:1rem;margin-bottom:1rem;border-radius:6px}
+#summaryCard{background:#fff;border-radius:8px;padding:1rem;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+#summaryJson{margin:0;white-space:pre-wrap;word-break:break-word}
+df-messenger{position:fixed;z-index:999;bottom:16px;right:16px}
+@media(max-width:900px){body{padding:0}df-messenger{left:0;right:0;width:100%;height:55%}}
+</style>
 </head>
 <body>
-  <!-- Page 1 – intro (filled from intro.html) -->
-  <div id="introPage"      class="page active container"></div>
 
-  <!-- Page 2 – quiz -->
-  <div id="quizPage"       class="page container">
-    <div class="timer">Time on quiz page: <span id="quizTimer">0.0</span> s</div>
-    <div id="quizScroll"   class="scroll-area"></div>
-    <button id="submitBtn" class="btn" disabled>Submit Answers</button>
+<!-- Page 1 Intro -->
+<div id="introPage" class="page active container"></div>
+
+<!-- Page 2 Quiz -->
+<div id="quizPage" class="page container">
+  <div class="timer">Time on quiz page: <span id="quizTimer">0.0</span> s</div>
+  <div id="quizScroll" class="scroll-area"></div>
+  <button id="submitBtn" class="btn" disabled>Submit Answers</button>
+</div>
+
+<!-- Page 3 Results -->
+<div id="resultsPage" class="page container">
+  <h2>Your Results</h2>
+  <p id="scoreLine"></p><p id="timeLine"></p>
+  <div id="solutionsScroll" class="scroll-area"></div>
+  <button id="toFeedbackBtn" class="btn">Continue to Feedback</button>
+</div>
+
+<!-- Page 4 Feedback -->
+<div id="feedbackPage" class="page container">
+  <h2>Your Feedback</h2>
+  <form id="feedbackForm" class="scroll-area" style="max-height:50vh"></form>
+  <button id="submitFeedbackBtn" class="btn" disabled style="margin-top:1rem">Submit Feedback</button>
+</div>
+
+<!-- Page 5 Summary -->
+<div id="summaryPage" class="page container">
+  <h2>Thank You</h2>
+  <div id="summaryCard">
+    <p id="summaryText"></p><pre id="summaryJson"></pre>
   </div>
+</div>
 
-  <!-- Page 3 – results -->
-  <div id="resultsPage"    class="page container">
-    <h2>Your Results</h2>
-    <p id="scoreLine"></p>
-    <p id="timeLine"></p>
-    <div id="solutionsScroll" class="scroll-area"></div>
-    <button id="toFeedbackBtn" class="btn">Continue to Feedback</button>
-  </div>
+<!-- Dialogflow CX widget -->
+<df-messenger
+  location="europe-west2"
+  project-id="incident-decision-tree-as-sppe"
+  agent-id="dfdb170b-7667-470a-81c3-3dfaa2488c5b"
+  language-code="en"
+  max-query-length="-1"
+  allow-feedback="all">
+  <df-messenger-chat-bubble chat-title="IDT"></df-messenger-chat-bubble>
+</df-messenger>
 
-  <!-- Page 4 – feedback -->
-  <div id="feedbackPage"   class="page container">
-    <h2>Your Feedback</h2>
-    <form id="feedbackForm" class="scroll-area" style="max-height:50vh"></form>
-    <button id="submitFeedbackBtn" class="btn" disabled style="margin-top:1rem">Submit Feedback</button>
-  </div>
+<script>
+/* ---------- CONFIG ---------- */
+const SHEET_ENDPOINT =
+  'https://script.google.com/macros/s/AKfycbzhWALkZL3vWhxfacbEnJNWQ7o4OoJ1ZaPtU-eTniXCBSaey4EG1u_tVbY3ZG8umepF/exec';
 
-  <!-- Page 5 – summary -->
-  <div id="summaryPage"    class="page container">
-    <h2>Thank You</h2>
-    <div id="summaryCard">
-      <p id="summaryText"></p>
-      <pre id="summaryJson"></pre>
-    </div>
-  </div>
+/* ---------- HELPERS ---------- */
+const $ = id => document.getElementById(id);
+const getJSON = p => fetch(p).then(r=>r.json());
+const getHTML = p => fetch(p).then(r=>r.text());
 
-  <!-- Dialogflow CX chatbot -->
-  <df-messenger
-    location="europe-west2"
-    project-id="incident-decision-tree-as-sppe"
-    agent-id="dfdb170b-7667-470a-81c3-3dfaa2488c5b"
-    environment="draft"
-    language-code="en">
-    <df-messenger-chat chat-title="IDT"></df-messenger-chat>
-  </df-messenger>
+/* ---------- STATE ---------- */
+let QUESTIONS=[], FEEDBACK=[];
+const state = {answers:[], feedback:[], start:0, score:0};
 
-  <script>
-    /* ----------------  CONFIG  ---------------- */
-    const SHEET_ENDPOINT =
-      'https://script.google.com/macros/s/AKfycbzhWALkZL3vWhxfacbEnJNWQ7o4OoJ1ZaPtU-eTniXCBSaey4EG1u_tVbY3ZG8umepF/exec';
+/* ---------- TIMER ---------- */
+const tEl=$('quizTimer'); let tick;
+const startTimer=()=>{state.start=Date.now();tick=setInterval(()=>tEl.textContent=((Date.now()-state.start)/1000).toFixed(1),100);};
+const stopTimer=()=>clearInterval(tick);
 
-    /* --------------  HELPERS  -------------- */
-    const $ = id => document.getElementById(id);
-    const getJSON  = p => fetch(p).then(r => r.json());
-    const getHTML  = p => fetch(p).then(r => r.text());
+/* ---------- P1 Intro ---------- */
+async function loadIntro(){
+  $('introPage').innerHTML = await getHTML('intro.html') +
+     '<button id="beginBtn" class="btn">Begin</button>';
+  $('beginBtn').onclick = initQuiz;
+}
 
-    /* --------------  STATE  -------------- */
-    let QUESTIONS=[], FEEDBACK=[];
-    const state = {answers:[], feedback:[], start:0, score:0};
+/* ---------- P2 Quiz ---------- */
+function renderQuiz(){
+  const box=$('quizScroll'); box.innerHTML='';
+  QUESTIONS.forEach((q,qi)=>{
+    box.insertAdjacentHTML('beforeend',
+      `<div style="margin-bottom:1rem">
+         <p class="question">${q.text}</p>
+         <div class="options">
+           ${q.options.map((opt,oi)=>
+              `<label><input type="radio" name="q${qi}" value="${oi}">
+                 ${String.fromCharCode(65+oi)} — ${opt}</label>`).join('')}
+         </div>
+       </div>`);
+  });
+  box.querySelectorAll('input').forEach(i=>i.addEventListener('change',readyCheck));
+}
+const readyCheck=()=>$('submitBtn').disabled=!QUESTIONS.every((_,i)=>document.querySelector(`input[name='q${i}']:checked`));
 
-    /* --------------  TIMER  -------------- */
-    const tEl=$('quizTimer'); let tick;
-    function startTimer(){ state.start=Date.now();
-      tick=setInterval(()=>{tEl.textContent=((Date.now()-state.start)/1000).toFixed(1)},100);}
-    const stopTimer=()=>clearInterval(tick);
+/* ---------- P3 Grade ---------- */
+function grade(){
+  stopTimer();
+  state.answers = QUESTIONS.map((_,i)=>+document.querySelector(`input[name='q${i}']:checked`).value);
+  state.score   = QUESTIONS.filter((q,i)=>q.correctIndex===state.answers[i]).length;
+  document.querySelectorAll('#quizScroll input').forEach(i=>i.disabled=true);
 
-    /* ---------- PAGE 1  ---------- */
-    async function loadIntro(){
-      $('introPage').innerHTML = await getHTML('intro.html') +
-        '<button id="beginBtn" class="btn">Begin</button>';
-      $('beginBtn').onclick = initQuiz;
-    }
+  $('scoreLine').textContent = `Score: ${state.score}/${QUESTIONS.length}`;
+  $('timeLine').textContent  = `Total time: ${tEl.textContent} s`;
 
-    /* ---------- PAGE 2 render ---------- */
-    function renderQuiz(){
-      const box=$('quizScroll'); box.innerHTML='';
-      QUESTIONS.forEach((q,qi)=>{
-        const blk=document.createElement('div'); blk.style.marginBottom='1rem';
-        blk.innerHTML=`<p class='question'>${q.text}</p>`;
-        const opts=document.createElement('div'); opts.className='options';
-        q.options.forEach((opt,oi)=>{
-          const lab=document.createElement('label');
-          lab.innerHTML=`<input type='radio' name='q${qi}' value='${oi}'> ${String.fromCharCode(65+oi)} — ${opt}`;
-          opts.appendChild(lab);
-        });
-        blk.appendChild(opts); box.appendChild(blk);
-      });
-      box.querySelectorAll('input').forEach(i=>i.addEventListener('change',checkReady));
-    }
-    function checkReady(){
-      $('submitBtn').disabled = !QUESTIONS.every((_,i)=>document.querySelector(`input[name='q${i}']:checked`));
-    }
+  const sol=$('solutionsScroll'); sol.innerHTML='';
+  QUESTIONS.forEach((q,i)=>{
+    sol.insertAdjacentHTML('beforeend',
+      `<div style="margin-bottom:1rem">
+         <p>${q.text}</p>
+         <p><strong>Correct:</strong> ${String.fromCharCode(65+q.correctIndex)} – ${q.options[q.correctIndex]}</p>
+         ${q.note?`<p><em>Note – ${q.note}</em></p>`:''}
+       </div>`);
+  });
+  show('resultsPage');
+}
 
-    /* ---------- PAGE 3 grade ---------- */
-    function grade(){
-      stopTimer();
-      state.answers = QUESTIONS.map((_,i)=>+document.querySelector(`input[name='q${i}']:checked`).value);
-      state.score   = QUESTIONS.filter((q,i)=>q.correctIndex===state.answers[i]).length;
-      document.querySelectorAll('#quizScroll input').forEach(i=>i.disabled=true);
+/* ---------- P4 Feedback ---------- */
+function renderFeedback(){
+  const form=$('feedbackForm'); form.innerHTML='';
+  FEEDBACK.forEach((f,idx)=>{
+    form.insertAdjacentHTML('beforeend',
+      `<div style="margin-bottom:.75rem">
+         <label style="font-weight:600">${f.label}</label><br>
+         ${[1,2,3,4,5].map(v=>
+            `<label style="margin-right:.5rem"><input type="radio" name="fb${idx}" value="${v}">${v}</label>`).join('')}
+       </div>`);
+  });
+  form.onchange = ()=>$('submitFeedbackBtn').disabled=!FEEDBACK.every((_,i)=>document.querySelector(`input[name='fb${i}']:checked`));
+}
+const collectFeedback=()=>state.feedback = FEEDBACK.map((_,i)=>+document.querySelector(`input[name='fb${i}']:checked`).value);
 
-      $('scoreLine').textContent = `Score: ${state.score}/${QUESTIONS.length}`;
-      $('timeLine').textContent  = `Total time: ${tEl.textContent} s`;
+/* ---------- P5 Summary & save ---------- */
+function showSummary(){
+  collectFeedback();
+  const summary={
+    score:`${state.score}/${QUESTIONS.length}`,
+    time_seconds:tEl.textContent,
+    feedback:state.feedback
+  };
+  $('summaryText').textContent='Submission saved to Google Sheets. Preview:';
+  $('summaryJson').textContent = JSON.stringify(summary,null,2);
 
-      const sol=$('solutionsScroll'); sol.innerHTML='';
-      QUESTIONS.forEach((q,i)=>{
-        sol.innerHTML += `<div style='margin-bottom:1rem'>
-          <p>${q.text}</p>
-          <p><strong>Correct:</strong> ${String.fromCharCode(65+q.correctIndex)} – ${q.options[q.correctIndex]}</p>
-          ${q.note?`<p><em>Note – ${q.note}</em></p>`:''}
-        </div>`;
-      });
-      show('resultsPage');
-    }
+  fetch(SHEET_ENDPOINT,{
+    method:'POST',
+    mode:'no-cors',                    // avoid CORS pre-flight
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(summary)
+  });
 
-    /* ---------- PAGE 4 feedback ---------- */
-    function renderFeedback(){
-      const form=$('feedbackForm'); form.innerHTML='';
-      FEEDBACK.forEach((f,idx)=>{
-        const grp=document.createElement('div'); grp.style.marginBottom='.75rem';
-        grp.innerHTML = `<label style='font-weight:600'>${f.label}</label><br>` +
-          [1,2,3,4,5].map(v=>`<label style='margin-right:.5rem'><input type='radio' name='fb${idx}' value='${v}'>${v}</label>`).join('');
-        form.appendChild(grp);
-      });
-      form.onchange = () => {
-        $('submitFeedbackBtn').disabled = !FEEDBACK.every((_,i)=>document.querySelector(`input[name='fb${i}']:checked`));
-      };
-    }
-    const collectFeedback = () =>
-      state.feedback = FEEDBACK.map((_,i)=>+document.querySelector(`input[name='fb${i}']:checked`).value);
+  show('summaryPage');
+}
 
-    /* ---------- PAGE 5 summary & save ---------- */
-    function showSummary(){
-      collectFeedback();
-      const summary = {
-        score:        `${state.score}/${QUESTIONS.length}`,
-        time_seconds: tEl.textContent,
-        feedback:     state.feedback
-      };
-      $('summaryText').textContent='Submission saved to Google Sheets. Preview:';
-      $('summaryJson').textContent = JSON.stringify(summary,null,2);
+/* ---------- Navigation ---------- */
+const show=id=>{document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');};
 
-      // send to Apps Script
-      fetch(SHEET_ENDPOINT,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify(summary)
-      }).catch(e=>console.error('Sheet error',e));
+/* ---------- Initialize Quiz ---------- */
+async function initQuiz(){
+  [QUESTIONS,FEEDBACK] = await Promise.all([getJSON('questions.json'), getJSON('feedback.json')]);
+  renderQuiz(); renderFeedback();
+  show('quizPage'); startTimer();
+  $('submitBtn').onclick=grade;
+  $('toFeedbackBtn').onclick=()=>show('feedbackPage');
+  $('submitFeedbackBtn').onclick=showSummary;
+}
 
-      show('summaryPage');
-    }
-
-    /* ---------- navigation ---------- */
-    const show=id=>{document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); $(id).classList.add('active');};
-
-    /* ---------- INIT ---------- */
-    async function initQuiz(){
-      [QUESTIONS,FEEDBACK] = await Promise.all([getJSON('questions.json'), getJSON('feedback.json')]);
-      renderQuiz();
-      renderFeedback();
-      show('quizPage');
-      startTimer();
-      $('submitBtn').onclick      = grade;
-      $('toFeedbackBtn').onclick  = () => show('feedbackPage');
-      $('submitFeedbackBtn').onclick = showSummary;
-    }
-
-    /* bootstrap */
-    loadIntro();
-  </script>
+/* Bootstrap intro page */
+loadIntro();
+</script>
 </body>
 </html>
