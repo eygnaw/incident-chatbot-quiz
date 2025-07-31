@@ -1,71 +1,134 @@
 <!DOCTYPE html>
+<!-- =============================================================
+ Clinical‑Governance Quiz + CX‑Chatbot  
+ Fully self‑contained front‑end (HTML + JS + CSS)  
+ Folder layout expected:  
+   intro.html        – static intro text (Page 1)  
+   questions.json    – array of scenario objects (Page 2)  
+   feedback.json     – array of {"label": "…"} (Page 4)  
+
+ Supabase: create table quiz_runs with columns
+   id uuid primary key default uuid_generate_v4()
+   created_at timestamptz default now()
+   score text           -- e.g. "5/7"
+   time_seconds numeric -- stored as string here, cast later if needed
+   feedback_1 smallint
+   feedback_2 smallint  -- add more to match feedback.json length
+
+ Paste your own Project URL + anon key below (already filled with live keys).  
+ ============================================================= -->
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Clinical Governance Quiz with IDT Chatbot</title>
-  <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
-  <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+
+  <!-- Dialogflow CX Messenger -->
+  <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css" />
+  <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger.js"></script>
+
+  <!-- Supabase client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <style>
-    /* ===== core ===== */
-    body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0 380px 0 0;background:#f9fafb;color:#111;box-sizing:border-box}
-    h1,h2{margin-top:0}
-    .container{max-width:800px;margin:0 auto;padding:2rem}
-    .page{display:none}
-    .page.active{display:block}
-    .btn{display:inline-block;padding:.6rem 1.4rem;background:#1e40af;color:#fff;border:none;border-radius:6px;font-size:1rem;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.15)}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    .timer{font-weight:bold;margin-bottom:1rem}
-    .question{font-weight:600;margin-bottom:.5rem}
-    .options label{display:block;margin-bottom:.4rem;cursor:pointer}
+    /* -------- global layout -------- */
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+      padding: 0 380px 0 0; /* space for chat panel */
+      background: #f9fafb;
+      color: #111;
+    }
+    h1, h2 { margin-top: 0; }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .page { display: none; }
+    .page.active { display: block; }
 
-    /* ===== scroll containers ===== */
-    .scroll-area{max-height:70vh;overflow-y:auto;border:1px solid #ddd;padding:1rem;margin-bottom:1rem;background:#fff;border-radius:6px;box-shadow:inset 0 1px 2px rgba(0,0,0,.05)}
+    /* -------- buttons -------- */
+    .btn {
+      display: inline-block;
+      padding: .6rem 1.4rem;
+      background: #1e40af;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,.15);
+    }
+    .btn:disabled { opacity: .6; cursor: not-allowed; }
 
-    /* ===== tables ===== */
-    table{border-collapse:collapse;width:100%;margin-bottom:1rem}
-    th,td{border:1px solid #e5e7eb;padding:.5rem;text-align:center}
-    th{background:#f3f4f6;font-weight:600}
+    .timer { font-weight: bold; margin-bottom: 1rem; }
+    .question { font-weight: 600; margin-bottom: .5rem; }
+    .options label { display: block; margin-bottom: .4rem; cursor: pointer; }
 
-    /* ===== summary prettification ===== */
-    #summaryCard{background:#fff;border-radius:8px;padding:1rem;box-shadow:0 2px 6px rgba(0,0,0,.08)}
-    #summaryJson{margin:0;white-space:pre-wrap;word-break:break-all}
+    /* scrollable boxes */
+    .scroll-area {
+      max-height: 70vh;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      background: #fff;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,.05);
+    }
 
-    /* ===== chatbot positioning ===== */
-    df-messenger{position:fixed;bottom:0;right:0;top:0;width:350px;max-width:100%;z-index:999;--df-messenger-font-color:#000;--df-messenger-font-family:Google Sans;--df-messenger-chat-background:#f3f6fc;--df-messenger-message-user-background:#d3e3fd;--df-messenger-message-bot-background:#fff}
-    @media(max-width:900px){body{padding:0}df-messenger{width:100%;height:50%;left:0;right:0;top:auto}}
+    /* tables */
+    table { border-collapse: collapse; width: 100%; margin-bottom: 1rem; }
+    th, td { border: 1px solid #e5e7eb; padding: .5rem; text-align: center; }
+    th { background: #f3f4f6; font-weight: 600; }
+
+    /* summary card */
+    #summaryCard {
+      background: #fff;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,.08);
+    }
+    #summaryJson { margin: 0; white-space: pre-wrap; }
+
+    /* chatbot positioning */
+    df-messenger {
+      position: fixed;
+      bottom: 0; right: 0; top: 0;
+      width: 350px; max-width: 100%;
+      --df-messenger-chat-background: #f3f6fc;
+    }
+    @media (max-width: 900px) {
+      body { padding: 0; }
+      df-messenger { width: 100%; height: 50%; left: 0; right: 0; top: auto; }
+    }
   </style>
 </head>
 <body>
-  <!-- INTRO (Page 1) -->
+  <!-- Page 1 – intro (loaded from intro.html) -->
   <div id="introPage" class="page active container"></div>
 
-  <!-- QUIZ (Page 2) -->
+  <!-- Page 2 – questions -->
   <div id="quizPage" class="page container">
-    <div class="timer">Time on quiz page: <span id="quizTimer">0.0</span> s</div>
+    <div class="timer">Time on quiz page: <span id="quizTimer">0.0</span> s</div>
     <div id="quizScroll" class="scroll-area"></div>
-    <button class="btn" id="submitBtn" disabled>Submit Answers</button>
+    <button id="submitBtn" class="btn" disabled>Submit Answers</button>
   </div>
 
-  <!-- RESULTS (Page 3) -->
+  <!-- Page 3 – results / solutions -->
   <div id="resultsPage" class="page container">
     <h2>Your Results</h2>
     <p id="scoreLine"></p>
     <p id="timeLine"></p>
     <div id="solutionsScroll" class="scroll-area"></div>
-    <button class="btn" id="toFeedbackBtn">Continue to Feedback</button>
+    <button id="toFeedbackBtn" class="btn">Continue to Feedback</button>
   </div>
 
-  <!-- FEEDBACK (Page 4) -->
+  <!-- Page 4 – feedback -->
   <div id="feedbackPage" class="page container">
     <h2>Your Feedback</h2>
     <form id="feedbackForm" class="scroll-area" style="max-height:50vh"></form>
-    <button class="btn" id="submitFeedbackBtn" disabled style="margin-top:1rem">Submit Feedback</button>
+    <button id="submitFeedbackBtn" class="btn" disabled style="margin-top:1rem">Submit Feedback</button>
   </div>
 
-  <!-- SUMMARY (Page 5) -->
+  <!-- Page 5 – summary -->
   <div id="summaryPage" class="page container">
     <h2>Thank You</h2>
     <div id="summaryCard">
@@ -74,29 +137,159 @@
     </div>
   </div>
 
-  <!-- Chatbot -->
-  <df-messenger location="europe-west2" project-id="incident-decision-tree-as-sppe" agent-id="dfdb170b-7667-470a-81c3-3dfaa2488c5b" environment="draft" language-code="en" allow-feedback="all">
+  <!-- Persistent Dialogflow CX chatbot -->
+  <df-messenger
+    location="europe-west2"
+    project-id="incident-decision-tree-as-sppe"
+    agent-id="dfdb170b-7667-470a-81c3-3dfaa2488c5b"
+    environment="draft"
+    language-code="en">
     <df-messenger-chat chat-title="IDT"></df-messenger-chat>
   </df-messenger>
 
   <script>
-    /* ===== Supabase minimal config (add your keys) ===== */
-    const SUPABASE_URL='https://hunbhfemzmpbvqgrhmwr.supabase.co';
-    const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1bmJoZmVtem1wYnZxZ3JobXdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM5ODE2NzEsImV4cCI6MjA2OTU1NzY3MX0.fKrWd7gFuGYwmgRqmyd_uy16P8oY0XO9lONtvgwhtP8';
-    const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
-    async function saveSummary(Object.fromEntries([
-        ['score',summary.score],
-        ['time_seconds',summary.time_seconds],
-        ...summary.feedback.map((v,i)=>[toKey(FBs[i].label),v])
-      ]));
-      show('summaryPage');}
+    /* -----------------------------------------------------------------
+       Supabase – live keys (safe anon key)  
+    ----------------------------------------------------------------- */
+    const SUPABASE_URL  = 'https://hunbhfemzmpbvqgrhmwr.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1bmJoZmVtem1wYnZxZ3JobXdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM5ODE2NzEsImV4cCI6MjA2OTU1NzY3MX0.fKrWd7gFuGYwmgRqmyd_uy16P8oY0XO9lONtvgwhtP8';
 
-    /* ===== nav util ===== */
-    function show(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');}
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    /* ===== flow ===== */
-    async function startQuiz(){[Qs,FBs]=await Promise.all([fetchJSON('questions.json'),fetchJSON('feedback.json')]);renderQuiz();renderFeedback();show('quizPage');startTimer();$('submitBtn').onclick=grade;$('toFeedbackBtn').onclick=()=>show('feedbackPage');$('submitFeedbackBtn').onclick=showSummary;}
+    /* ------------------ helpers ------------------ */
+    const $ = id => document.getElementById(id);
+    const fetchText = path => fetch(path).then(r => r.text());
+    const fetchJSON = path => fetch(path).then(r => r.json());
 
+    /* ------------------ state ------------------ */
+    let QUESTIONS = [], FEEDBACK = [];
+    const state = { answers: [], feedback: [], start: 0, score: 0 };
+
+    /* ------------------ timer ------------------ */
+    const timerEl = $('quizTimer');
+    let tick;
+    function startTimer() {
+      state.start = Date.now();
+      tick = setInterval(() => {
+        timerEl.textContent = ((Date.now() - state.start) / 1000).toFixed(1);
+      }, 100);
+    }
+    function stopTimer() { clearInterval(tick); }
+
+    /* ------------------ load intro ------------------ */
+    async function loadIntro() {
+      $('introPage').innerHTML = await fetchText('intro.html') +
+        '<button id="beginBtn" class="btn">Begin</button>';
+      $('beginBtn').onclick = startQuiz;
+    }
+
+    /* ------------------ render quiz ------------------ */
+    function renderQuiz() {
+      const box = $('quizScroll');
+      box.innerHTML = '';
+      QUESTIONS.forEach((q, i) => {
+        const blk = document.createElement('div');
+        blk.style.marginBottom = '1rem';
+        blk.innerHTML = `<p class='question'>${q.text}</p>`;
+        const opts = document.createElement('div');
+        opts.className = 'options';
+        q.options.forEach((opt, j) => {
+          const lab = document.createElement('label');
+          lab.innerHTML = `<input type='radio' name='q${i}' value='${j}'> ${String.fromCharCode(65 + j)} — ${opt}`;
+          opts.appendChild(lab);
+        });
+        blk.appendChild(opts);
+        box.appendChild(blk);
+      });
+      box.querySelectorAll('input').forEach(inp => inp.addEventListener('change', checkReady));
+    }
+    function checkReady() {
+      $('submitBtn').disabled = !QUESTIONS.every((_, i) => document.querySelector(`input[name='q${i}']:checked`));
+    }
+
+    /* ------------------ grade ------------------ */
+    function grade() {
+      stopTimer();
+      state.answers = QUESTIONS.map((_, i) => +document.querySelector(`input[name='q${i}']:checked`).value);
+      state.score = QUESTIONS.filter((q, i) => q.correctIndex === state.answers[i]).length;
+      document.querySelectorAll('#quizScroll input').forEach(el => el.disabled = true);
+
+      $('scoreLine').textContent = `Score: ${state.score} / ${QUESTIONS.length}`;
+      $('timeLine').textContent  = `Total time: ${timerEl.textContent} s`;
+
+      const sol = $('solutionsScroll');
+      sol.innerHTML = '';
+      QUESTIONS.forEach((q, i) => {
+        sol.innerHTML += `<div style='margin-bottom:1rem'>
+          <p>${q.text}</p>
+          <p><strong>Correct:</strong> ${String.fromCharCode(65 + q.correctIndex)} – ${q.options[q.correctIndex]}</p>
+          ${q.note ? `<p><em>Note – ${q.note}</em></p>` : ''}
+        </div>`;
+      });
+      show('resultsPage');
+    }
+
+    /* ------------------ feedback ------------------ */
+    function renderFeedback() {
+      const form = $('feedbackForm');
+      form.innerHTML = '';
+      FEEDBACK.forEach((item, idx) => {
+        const grp = document.createElement('div');
+        grp.style.marginBottom = '.75rem';
+        grp.innerHTML = `<label style='font-weight:600'>${item.label}</label><br>` +
+          [1,2,3,4,5].map(v => `<label style='margin-right:.5rem'><input type='radio' name='fb${idx}' value='${v}'>${v}</label>`).join('');
+        form.appendChild(grp);
+      });
+      form.onchange = () => {
+        const all = FEEDBACK.every((_, i) => document.querySelector(`input[name='fb${i}']:checked`));
+        $('submitFeedbackBtn').disabled = !all;
+      };
+    }
+    function collectFeedback() {
+      state.feedback = FEEDBACK.map((_, i) => +document.querySelector(`input[name='fb${i}']:checked`).value);
+    }
+
+    /* ------------------ summary & save ------------------ */
+    function showSummary() {
+      collectFeedback();
+      const summary = {
+        score: `${state.score}/${QUESTIONS.length}`,
+        time_seconds: timerEl.textContent,
+        feedback: state.feedback
+      };
+      $('summaryText').textContent = 'Submission saved. Preview:';
+      $('summaryJson').textContent = JSON.stringify(summary, null, 2);
+
+      // flatten feedback → feedback_1, feedback_2, …
+      const row = {
+        score: summary.score,
+        time_seconds: summary.time_seconds,
+        ...summary.feedback.reduce((acc, v, idx) => ({ ...acc, [`feedback_${idx+1}`]: v }), {})
+      };
+      sb.from('quiz_runs').insert([row]);
+
+      show('summaryPage');
+    }
+
+    /* ------------------ nav helper ------------------ */
+    function show(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      $(id).classList.add('active');
+    }
+
+    /* ------------------ main flow ------------------ */
+    async function startQuiz() {
+      [QUESTIONS, FEEDBACK] = await Promise.all([fetchJSON('questions.json'), fetchJSON('feedback.json')]);
+      renderQuiz();
+      renderFeedback();
+      show('quizPage');
+      startTimer();
+      $('submitBtn').onclick = grade;
+      $('toFeedbackBtn').onclick = () => show('feedbackPage');
+      $('submitFeedbackBtn').onclick = showSummary;
+    }
+
+    /* ------------------ bootstrap ------------------ */
     loadIntro();
   </script>
 </body>
