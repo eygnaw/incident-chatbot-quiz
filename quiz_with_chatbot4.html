@@ -60,66 +60,72 @@ df-messenger{position:fixed;bottom:16px;right:16px;z-index:999}
 </df-messenger>
 
 <script>
-/* ---------- CONFIG ---------- */
+/* --------- constant unchanged --------- */
 const SHEET_ENDPOINT =
   'https://script.google.com/macros/s/AKfycbzhWALkZL3vWhxfacbEnJNWQ7o4OoJ1ZaPtU-eTniXCBSaey4EG1u_tVbY3ZG8umepF/exec';
 
-/* ---------- UTILS ---------- */
+/* --------- helpers --------- */
 const $ = id => document.getElementById(id);
+const get = p => fetch(p).then(r=>r.json());
 const html = p => fetch(p).then(r=>r.text());
-const json = p => fetch(p).then(r=>r.json());
 const show = id => {document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');};
 
-/* ---------- STATE ---------- */
+/* --------- state --------- */
 let Q=[], FB=[];
 const S = {ans:[], fb:[], start:0, score:0};
 
-/* ---------- TIMER ---------- */
-const tEl=$('timer'); let tick;
-const start=()=>{S.start=Date.now();tick=setInterval(()=>tEl.textContent=((Date.now()-S.start)/1000).toFixed(1),100)};
+/* --------- timer --------- */
+const t=$('timer'); let tick;
+const start=()=>{S.start=Date.now();tick=setInterval(()=>t.textContent=((Date.now()-S.start)/1000).toFixed(1),100);}
 const stop =()=>clearInterval(tick);
 
-/* ---------- BUILD QUIZ ---------- */
+/* --------- quiz builder --------- */
 function buildQuiz(){
   const box=$('quizBox'); box.innerHTML='';
   Q.forEach((q,qi)=>{
-    box.insertAdjacentHTML('beforeend',
-      `<p class="question">${q.text}</p>
-       ${q.options.map((o,oi)=>
-         `<label><input type="radio" name="q${qi}" value="${oi}"> ${String.fromCharCode(65+oi)} — ${o}</label><br>`).join('')}
-       <hr>`);});
-  box.querySelectorAll('input').forEach(i=>i.addEventListener('change',()=>$('quizSubmit').disabled=!Q.some((_,ix)=>!document.querySelector(`input[name='q${ix}']:checked`))));
+    box.insertAdjacentHTML('beforeend',`
+      <p class="question">${q.text}</p>
+      ${q.options.map((o,oi)=>`<label><input type="radio" name="q${qi}" value="${oi}"> ${String.fromCharCode(65+oi)} — ${o}</label><br>`).join('')}
+      <hr>`);});
+  box.querySelectorAll('input').forEach(i=>i.addEventListener('change',checkReady));
+}
+function checkReady(){
+  const ready = Q.every((_,i)=>document.querySelector(`input[name='q${i}']:checked`));
+  $('quizSubmit').disabled = !ready;
 }
 
-/* ---------- GRADE ---------- */
+/* --------- grade & solutions --------- */
 function grade(){
   stop();
   S.ans = Q.map((_,i)=>+document.querySelector(`input[name='q${i}']:checked`).value);
   S.score= Q.filter((q,i)=>q.correctIndex===S.ans[i]).length;
+  document.querySelectorAll('#quizBox input').forEach(i=>i.disabled=true);
+
   $('score').textContent   = `Score: ${S.score}/${Q.length}`;
-  $('elapsed').textContent = `Time: ${tEl.textContent}s`;
+  $('elapsed').textContent = `Time: ${t.textContent}s`;
+
   const sol=$('solutions'); sol.innerHTML='';
-  Q.forEach((q,i)=>sol.insertAdjacentHTML('beforeend',
-    `<p>${q.text}<br><strong>Correct:</strong> ${String.fromCharCode(65+q.correctIndex)} – ${q.options[q.correctIndex]}</p>`));
-  show('resultPage');
+  Q.forEach((q,i)=>sol.insertAdjacentHTML('beforeend',`
+    <p>${q.text}<br><strong>Correct:</strong> ${String.fromCharCode(65+q.correctIndex)} – ${q.options[q.correctIndex]}</p>`));
+  show('resultPage');                  /* ← fixed id */
 }
 
-/* ---------- FEEDBACK ---------- */
-function buildFb(){
+/* --------- feedback builder --------- */
+function buildFB(){
   const f=$('fbForm'); f.innerHTML='';
-  FB.forEach((item,i)=>{
-    f.insertAdjacentHTML('beforeend',
-      `<p style="font-weight:600">${item.label}</p>
-       ${[1,2,3,4,5].map(v=>`<label style="margin-right:.5rem"><input type="radio" name="fb${i}" value="${v}">${v}</label>`).join('')}<hr>`);});
-  f.onchange=()=>$('fbSubmit').disabled=!FB.some((_,i)=>!document.querySelector(`input[name='fb${i}']:checked`));
+  FB.forEach((item,i)=>f.insertAdjacentHTML('beforeend',`
+    <p style="font-weight:600">${item.label}</p>
+    ${[1,2,3,4,5].map(v=>`<label style="margin-right:.5rem"><input type="radio" name="fb${i}" value="${v}">${v}</label>`).join('')}
+    <hr>`));
+  f.onchange = ()=>$('fbSubmit').disabled = !FB.every((_,i)=>document.querySelector(`input[name='fb${i}']:checked`));
 }
-const grabFb=()=>S.fb = FB.map((_,i)=>+document.querySelector(`input[name='fb${i}']:checked`).value);
+const grabFB = ()=> S.fb = FB.map((_,i)=>+document.querySelector(`input[name='fb${i}']:checked`).value);
 
-/* ---------- SAVE ---------- */
+/* --------- summary & sheets --------- */
 function finish(){
-  grabFb();
-  const summary={score:`${S.score}/${Q.length}`,time_seconds:tEl.textContent,feedback:S.fb};
-  $('summary').textContent=JSON.stringify(summary,null,2);
+  grabFB();
+  const summary={score:`${S.score}/${Q.length}`,time_seconds:t.textContent,feedback:S.fb};
+  $('summary').textContent = JSON.stringify(summary,null,2);
 
   fetch(SHEET_ENDPOINT,{
     method:'POST',mode:'no-cors',
@@ -129,15 +135,17 @@ function finish(){
   show('thanksPage');
 }
 
-/* ---------- FLOW ---------- */
+/* --------- init --------- */
 async function initQuiz(){
-  [Q,FB]=await Promise.all([json('questions.json'),json('feedback.json')]);
-  buildQuiz(); buildFb(); show('quizPage'); start();
-  $('quizSubmit').onclick  = grade;
-  $('toFb').onclick        = ()=>show('fbPage');
-  $('fbSubmit').onclick    = finish;
+  [Q,FB] = await Promise.all([get('questions.json'), get('feedback.json')]);
+  buildQuiz(); buildFB(); show('quizPage'); start();
+  $('quizSubmit').onclick = grade;
+  $('toFb').onclick       = ()=>show('fbPage');
+  $('fbSubmit').onclick   = finish;
 }
-html('intro.html').then(txt=>{$('introPage').innerHTML=txt+'<button class="btn" id="begin">Begin</button>';$('begin').onclick=initQuiz;});
+/* intro bootstrap */
+html('intro.html').then(t=>{$('introPage').innerHTML=t+'<button class="btn" id="begin">Begin</button>';$('begin').onclick=initQuiz;});
 </script>
+
 </body>
 </html>
