@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clinical Governance Quiz with IDT Chatbot</title>
+  <!-- Dialogflow CX Messenger -->
+  <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+  <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+  <!-- Supabase client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0 380px 0 0;background:#f9fafb;color:#111;box-sizing:border-box}
+    h1,h2{margin-top:0}
+    .container{max-width:800px;margin:0 auto;padding:2rem}
+    .page{display:none}
+    .page.active{display:block}
+    .btn{display:inline-block;padding:.6rem 1.2rem;background:#1e40af;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:1rem}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .timer{font-weight:bold;margin-bottom:1rem}
+    .question{font-weight:bold;margin-bottom:.75rem}
+    .options label{display:block;margin-bottom:.4rem;cursor:pointer}
+    table{border-collapse:collapse;width:100%;margin-bottom:1rem}
+    th,td{border:1px solid #ddd;padding:.5rem;text-align:center}
+    th{background:#e5e7eb}
+    df-messenger{position:fixed;bottom:0;right:0;top:0;width:350px;max-width:100%;z-index:999;--df-messenger-font-color:#000;--df-messenger-font-family:Google Sans;--df-messenger-chat-background:#f3f6fc;--df-messenger-message-user-background:#d3e3fd;--df-messenger-message-bot-background:#fff}
+    @media(max-width:900px){body{padding:0}df-messenger{width:100%;height:50%;left:0;right:0;top:auto}}
+  </style>
+</head>
+<body>
+  <div id="page1" class="page active container">
+    <h1>Clinical Governance Quiz</h1>
+    <p>This quiz presents real‑world scenarios drawn from the National Patient Safety Agency’s <em>Incident Decision Tree</em>. Select the option you judge most appropriate. The timer only runs while the questions are on screen. When finished you will see your score and can give feedback.</p>
+    <p>The IDT chatbot at the right is available throughout for guidance.</p>
+    <button class="btn" id="startBtn">Start Quiz</button>
+  </div>
+
+  <div id="page2" class="page container">
+    <div class="timer">Time on quiz page: <span id="timer">0</span> s</div>
+    <div id="quizContent"></div>
+    <button class="btn" id="submitBtn" disabled>Submit Answers</button>
+  </div>
+
+  <div id="page3" class="page container">
+    <h2>Your Results</h2>
+    <p id="scoreLine"></p>
+    <p id="timeLine"></p>
+    <div id="answerReview"></div>
+    <button class="btn" id="nextToFeedbackBtn">Continue to Feedback</button>
+  </div>
+
+  <div id="page4" class="page container">
+    <h2>Feedback</h2>
+    <p>Rate each aspect from 1 (strongly disagree) to 5 (strongly agree).</p>
+    <form id="feedbackForm">
+      <table>
+        <thead><tr><th>Metric</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead>
+        <tbody id="feedbackTableBody"></tbody>
+      </table>
+      <button class="btn" type="submit">Submit Feedback & Finish</button>
+    </form>
+    <div id="thanks" style="display:none"><p>Thank you. Your responses have been logged.</p><p id="saveMsg" style="font-weight:bold"></p></div>
+  </div>
+
+  <df-messenger location="europe-west2" project-id="incident-decision-tree-as-sppe" agent-id="dfdb170b-7667-470a-81c3-3dfaa2488c5b" environment="draft" language-code="en" max-query-length="-1" allow-feedback="all">
+    <df-messenger-chat chat-title="IDT"></df-messenger-chat>
+  </df-messenger>
+
+  <script>
+    /* ===== Supabase (placeholder – add your keys) ===== */
+    const SUPABASE_URL='https://YOUR_PROJECT.supabase.co';
+    const SUPABASE_ANON='YOUR_ANON_KEY';
+    const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+    async function logToSupabase(payload){try{const{error}=await sb.from('quiz_runs').insert([payload]);if(error)throw error;document.getElementById('saveMsg').textContent='Metrics saved.';}catch(e){console.error(e);document.getElementById('saveMsg').textContent='Could not save metrics ('+e.message+')';}}
+
+    /* ===== Questions ===== */
+    const questions=[
+      {
+        text:'A night nurse repeatedly administered 5 mg of midazolam to restless elderly patients so the ward would stay quiet. One patient aspirated and required admission to a High Dependency Unit. The nurse kept no records, said the practice was “normal” on nights and showed no remorse.',
+        options:[
+          'Suspend pending investigation; allow return only if reflective.',
+          'Redeploy to day shifts with medicines‑management retraining.',
+          'Final written warning and ongoing supervision.',
+          'Dismiss for gross misconduct and refer to the Nursing and Midwifery Council.'
+        ],
+        correctIndex:3
+      },
+      {
+        text:'During a night shift, a staff nurse removed a 10 mg morphine ampoule from the ward cabinet and administered half to a patient in severe pain. She kept the remainder for her own chronic backache and falsified the drug register.',
+        options:[
+          'Suspend immediately, inform the police, and refer to the Nursing and Midwifery Council.',
+          'Redeploy to another ward and issue a written warning.',
+          'Require supervised practice and medicines‑management retraining.',
+          'Arrange only an Occupational Health referral, with no disciplinary action.'
+        ],
+        correctIndex:0
+      },
+      {
+        text:'In the operating theatre a consultant surgeon threw a metal instrument that struck a scrub nurse after a stapler mis‑fired. No patient was harmed. The surgeon apologised at once and disclosed decades of unblemished service, but admitted similar outbursts in the past.',
+        options:[
+          'Immediate suspension pending investigation and referral to the General Medical Council.',
+          'Mandatory anger‑management training while continuing work under closer supervision.',
+          'No action – the nurse was uninjured.',
+          'Dismissal for gross misconduct.'
+        ],
+        correctIndex:0
+      },
+      {
+        text:'A Core Trainee Year 1 doctor, working a 16‑hour stretch, prescribed a second loading dose of phenytoin four hours after the first because she forgot it had already been given. Review found extreme fatigue due to rota gaps. She was distraught and fully cooperative.',
+        options:[
+          'Suspend for reckless prescribing.',
+          'Refer to Occupational Health, adjust the rota, and provide rest‑break education; no suspension.',
+          'Dismiss the doctor for gross negligence.',
+          'Refer to the General Medical Council and notify the police.'
+        ],
+        correctIndex:1
+      },
+      {
+        text:'In a care home, a healthcare assistant taped an agitated person with dementia to the bed rails “so she would not fall”. The resident sustained bruising. Protocols for low‑bed placement and one‑to‑one observation were available and had been taught; the assistant completed the training three months earlier.',
+        options:[
+          'Suspend and proceed to a disciplinary hearing, with possible referral to the police and the Care Quality Commission.',
+          'Retrain on dementia care and move to a different unit.',
+          'Record this solely as a system failure with no individual action.',
+          'Arrange an Occupational Health referral for stress.'
+        ],
+        correctIndex:0
+      },
+      {
+        text:'A locum anaesthetist performed a left‑sided brachial plexus block instead of right. Two different versions of the theatre checklist were displayed; one used outdated terminology. The locum followed the obsolete version in good faith.',
+        options:[
+          'Suspend and refer to the General Medical Council.',
+          'Issue a written warning for poor attention to detail.',
+          'Treat as a system failure; deliver a human‑factors briefing and update the checklists immediately.',
+          'Dismiss for gross professional misconduct.'
+        ],
+        correctIndex:2
+      },
+      {
+        text:'A radiographer was found visibly unsteady and smelled of alcohol during a computed tomography night shift. A breath test arranged by the duty manager was positive. No scans had yet been performed that evening.',
+        options:[
+          'Send home, impose formal suspension, and refer to Occupational Health and the Health and Care Professions Council.',
+          'Allow time to sober up and then continue the shift.',
+          'Issue a verbal warning and arrange counselling.',
+          'Redeploy to office duties with no further action.'
+        ],
+        correctIndex:0
+      }
+    ];
+
+    /* ===== Feedback metrics ===== */
+    const feedbackMetrics=[
+      {id:'understood_input',label:'The agent understood what I wrote'},
+      {id:'understood_nl',label:'The agent can understand natural language'},
+      {id:'intelligent',label:'The agent is intelligent'},
+      {id:'met_expectations',label:'The agent’s capabilities met my expectations'},
+      {id:'broke_thought',label:'The agent’s answers often broke my line of thought'},
+      {id:'formulate_sentences',label:'I had difficulty formulating my sentences to be understood'},
+      {id:'info_needed',label:'I had all the information needed to engage properly with the agent'},
+      {id:'learned_more',label:'I learned more than I initially knew during the interaction'},
+      {id:'unanswered_questions',label:'There were questions the agent could not answer'},
+      {id:'fluid',label:'I felt the conversation was fluid'},
+      {id:'tasks_easy',label:'I concluded my tasks without effort'},
+      {id:'lost_for_words',label:'I did not know what to say next to the agent'},
+      {id:'helped_tasks',label:'The agent helped me conclude my tasks'}
+    ];
+
+    /* ===== Runtime state ===== */
+    const state={quizStart:null,quizEnd:null,timeOnQuizSeconds:0,answers:[],score:0,feedback:{}};
+
+    /* ===== DOM shortcuts ===== */
+    const $=id=>document.getElementById(id);
+    const startBtn=$('startBtn');
+    const submitBtn=$('submitBtn');
+    const nextBtn=$('nextToFeedbackBtn');
+    const quizArea=$('quizContent');
+    const timerEl=$('timer');
+    const scoreLine=$('scoreLine');
+    const timeLine=$('timeLine');
+    const review=$('answerReview');
+    const fbBody=$('feedbackTableBody');
+    const fbForm=$('feedbackForm');
+
+    /* ===== Page nav ===== */
+    function show(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');}
+
+    /* ===== Timer ===== */
+    let tick;
+    function startTimer(){state.quizStart=Date.now();tick=setInterval(()=>{state.timeOnQuizSeconds=Math.floor((Date.now()-state.quizStart)/1000);timerEl.textContent=state.timeOnQuizSeconds;},250);}    
+    function stopTimer(){clearInterval(tick);}    
+
+    /* ===== Render quiz ===== */
+    function renderQuiz(){quizArea.innerHTML='';questions.forEach((q,qi)=>{const blk=document.createElement('div');blk.className='question-block';const qP=document.createElement('p');qP.className='question';qP.textContent=q.text;blk.appendChild(qP);const opts=document.createElement('div');opts.className='options';q.options.forEach((o,oi)=>{const lab=document.createElement('label');const r=document.createElement('input');r.type='radio';r.name='q'+qi;r.value=oi;r.addEventListener('change',checkAns);lab.appendChild(r);lab.appendChild(document.createTextNode(' '+String.fromCharCode(65+oi)+' — '+o));opts.appendChild(lab);});blk.appendChild(opts);quizArea.appendChild(blk);});}
+    function checkAns(){submitBtn.disabled=!questions.every((_,i)=>document.querySelector(`input[name='q${i}']:checked`));}
+
+    /* ===== Grade ===== */
+    function grade(){stopTimer();state.quizEnd=Date.now();questions.forEach((q,i)=>{const sel=parseInt(document.querySelector(`input[name='q${i}']:checked`).value,10);state.answers.push(sel);if(sel===q.correctIndex)state.score++;});scoreLine.textContent=`Score: ${state.score} / ${questions.length}`;timeLine.textContent=`Time on questions: ${state.timeOnQuizSeconds} s`;review.innerHTML='';questions.forEach((q,i)=>{const p=document.createElement('p');const good=String.fromCharCode(65+q.correctIndex);const mine=String.fromCharCode(65+state.answers[i]);p.textContent=`Q${i+1}: correct ${good}; you chose ${mine}`;p.style.color=q.correctIndex===state.answers[i]?'#15803d':'#b91c1c';review.appendChild(p);});}
+
+    /* ===== Feedback form ===== */
+    function renderFb(){fbBody.innerHTML='';feedbackMetrics.forEach(m=>{const tr=document.createElement('tr');const tdL=document.createElement('td');tdL.textContent=m.label;tr.appendChild(tdL);for(let i=1;i<=5;i++){const td=document.createElement('td');const r=document.createElement('input');r.type='radio';r.name=m.id;r.value=i;td.appendChild(r);tr.appendChild(td);}fbBody.appendChild(tr);});}
+    function collectFb(){feedbackMetrics.forEach(m=>{const v=document.querySelector(`input[name='${m.id}']:checked`);state.feedback[m.id]=v?parseInt(v.value,10):null;});}
+
+    /* ===== Event hooks ===== */
+    startBtn.onclick=()=>{renderQuiz();show('page2');startTimer();};
+    submitBtn.onclick=()=>{grade();show('page3');};
+    nextBtn.onclick=()=>{renderFb();show('page4');};
+    fbForm.onsubmit=async e=>{e.preventDefault();collectFb();await logToSupabase({score:state.score,time_on_quiz:state.timeOnQuizSeconds,answers:state.answers,feedback:state.feedback});fbForm.style.display='none';$('thanks').style.display='block';};
+  </script>
+</body>
+</html>
