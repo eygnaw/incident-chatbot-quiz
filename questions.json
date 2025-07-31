@@ -1,25 +1,21 @@
 [
   {
-    "text": "A night nurse repeatedly gave 5 mg midazolam …",
-    "options": [
-      "Suspend pending investigation; allow return if reflective.",
-      "Redeploy to days with medicines-management retraining.",
-      "Final written warning, keep under supervision.",
-      "Dismiss for gross misconduct and refer to the Nursing and Midwifery Council."
-    ],
-    "correctIndex": 3,
-    "note": "Deliberate, recurrent breach placing patients at serious risk; no mitigating context."
-  },
-  {
-    "text": "Here is a incident scenario …",
-    "options": [ "…A", "…B", "…C", "…D" ],
+    "text": "Q1 placeholder text …",
+    "options": ["Option A","Option B","Option C","Option D"],
     "correctIndex": 0,
-    "note": "Add here some observations that point to the right answer ..."
+    "note": "Why A is correct."
   },
-  {
-    "text": "Here is a sdfsdf scenario …",
-    "options": [ "…A", "…B", "…C", "…D" ],
-    "correctIndex": 0,
-    "note": "Add here some observations that point to the right answer ..."
-  }
+  { "text": "Q2 placeholder …", 
+    "options": ["A","B","C","D"], 
+    "correctIndex": 1, 
+    "note": "Why B." 
+  },
+  { "text": "Q3 placeholder …", "options": ["A","B","C","D"], "correctIndex": 2, "note": "" },
+  { "text": "Q4 placeholder …", "options": ["A","B","C","D"], "correctIndex": 3, "note": "" },
+  { "text": "Q5 placeholder …", "options": ["A","B","C","D"], "correctIndex": 0, "note": "" },
+  { "text": "Q6 placeholder …", "options": ["A","B","C","D"], "correctIndex": 1, "note": "" },
+  { "text": "Q7 placeholder …", "options": ["A","B","C","D"], "correctIndex": 2, "note": "" },
+  { "text": "Q8 placeholder …", "options": ["A","B","C","D"], "correctIndex": 3, "note": "" },
+  { "text": "Q9 placeholder …", "options": ["A","B","C","D"], "correctIndex": 0, "note": "" },
+  { "text": "Q10 placeholder …","options": ["A","B","C","D"], "correctIndex": 1, "note": "" }
 ]
