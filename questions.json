@@ -15,5 +15,11 @@
     "options": [ "…A", "…B", "…C", "…D" ],
     "correctIndex": 0,
     "note": "Add here some observations that point to the right answer ..."
+  },
+  {
+    "text": "Here is a sdfsdf scenario …",
+    "options": [ "…A", "…B", "…C", "…D" ],
+    "correctIndex": 0,
+    "note": "Add here some observations that point to the right answer ..."
   }
 ]
