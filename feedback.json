@@ -1,0 +1,4 @@
+[
+  { "id": "understood_input", "label": "The agent understood what I wrote" },
+  { "id": "new_metric",       "label": "I would use this tool again" }
+]

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clinical Governance Quiz with IDT Chatbot</title>
+  <!-- Dialogflow CX Messenger -->
+  <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+  <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0 380px 0 0;background:#f9fafb;color:#111;box-sizing:border-box}
+    h1,h2{margin-top:0}
+    .container{max-width:800px;margin:0 auto;padding:2rem}
+    .page{display:none}
+    .page.active{display:block}
+    .btn{display:inline-block;padding:.6rem 1.2rem;background:#1e40af;color:#fff;border:none;border-radius:4px;font-size:1rem;cursor:pointer}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .timer{font-weight:bold;margin-bottom:1rem}
+    .question{font-weight:bold;margin-bottom:.5rem}
+    .options label{display:block;margin-bottom:.4rem;cursor:pointer}
+    .scroll-area{max-height:70vh;overflow-y:auto;border:1px solid #ddd;padding:1rem;margin-bottom:1rem;background:#fff}
+    table{border-collapse:collapse;width:100%;margin-bottom:1rem}
+    th,td{border:1px solid #ddd;padding:.5rem;text-align:center}
+    th{background:#e5e7eb}
+    df-messenger{position:fixed;bottom:0;right:0;top:0;width:350px;max-width:100%;z-index:999;--df-messenger-font-color:#000;--df-messenger-font-family:Google Sans;--df-messenger-chat-background:#f3f6fc;--df-messenger-message-user-background:#d3e3fd;--df-messenger-message-bot-background:#fff}
+    @media(max-width:900px){body{padding:0}df-messenger{width:100%;height:50%;left:0;right:0;top:auto}}
+  </style>
+</head>
+<body>
+  <!-- INTRO (Page 1) -->
+  <div id="introPage" class="page active container"></div>
+
+  <!-- QUIZ (Page 2) -->
+  <div id="quizPage" class="page container">
+    <div class="timer">Time on quiz page: <span id="quizTimer">0</span> s</div>
+    <div id="quizScroll" class="scroll-area"></div>
+    <button class="btn" id="submitBtn" disabled>Submit Answers</button>
+  </div>
+
+  <!-- RESULTS (Page 3) -->
+  <div id="resultsPage" class="page container">
+    <h2>Your Results</h2>
+    <p id="scoreLine"></p>
+    <p id="timeLine"></p>
+    <div id="solutionsScroll" class="scroll-area"></div>
+    <button class="btn" id="toFeedbackBtn">Continue to Feedback</button>
+  </div>
+
+  <!-- FEEDBACK (Page 4) -->
+  <div id="feedbackPage" class="page container">
+    <h2>Feedback</h2>
+    <form id="feedbackForm"></form>
+    <button class="btn" id="submitFeedbackBtn" disabled>Submit Feedback</button>
+  </div>
+
+  <!-- SUMMARY (Page 5) -->
+  <div id="summaryPage" class="page container">
+    <h2>Thank You</h2>
+    <p id="summaryText"></p>
+    <pre id="summaryJson" style="background:#f3f4f6;padding:1rem;border-radius:4px;overflow:auto"></pre>
+  </div>
+
+  <!-- Chatbot -->
+  <df-messenger location="europe-west2" project-id="incident-decision-tree-as-sppe" agent-id="dfdb170b-7667-470a-81c3-3dfaa2488c5b" environment="draft" language-code="en" allow-feedback="all">
+    <df-messenger-chat chat-title="IDT"></df-messenger-chat>
+  </df-messenger>
+
+  <script>
+    /* ===================== Modular loaders ===================== */
+    const $=id=>document.getElementById(id);
+
+    async function loadIntro(){const txt=await fetch('intro.html').then(r=>r.text());$('introPage').innerHTML=txt+`<button class="btn" id="beginBtn">Begin</button>`;$('beginBtn').onclick=startQuiz;}
+    async function loadQuestions(){return fetch('questions.json').then(r=>r.json());}
+    async function loadFeedbackItems(){return fetch('feedback.json').then(r=>r.json());}
+
+    /* ===================== Global state ===================== */
+    let Qs=[],FBs=[];const state={answers:[],quizStart:0,score:0};
+
+    /* ===================== Timer ===================== */
+    const timerEl=$('quizTimer');let tick;function startTimer(){state.quizStart=Date.now();tick=setInterval(()=>{timerEl.textContent=Math.floor((Date.now()-state.quizStart)/1000);},250);}function stopTimer(){clearInterval(tick);}    
+
+    /* ===================== Quiz render ===================== */
+    function renderQuiz(){const area=$('quizScroll');area.innerHTML='';Qs.forEach((q,qi)=>{const blk=document.createElement('div');blk.style.marginBottom='1rem';blk.innerHTML=`<p class="question">${q.text}</p>`;const optDiv=document.createElement('div');optDiv.className='options';q.options.forEach((o,oi)=>{const lab=document.createElement('label');lab.innerHTML=`<input type="radio" name="q${qi}" value="${oi}"> ${String.fromCharCode(65+oi)} — ${o}`;optDiv.appendChild(lab);});blk.appendChild(optDiv);area.appendChild(blk);});area.querySelectorAll('input').forEach(inp=>inp.addEventListener('change',checkComplete));}
+    function checkComplete(){const done=Qs.every((_,i)=>document.querySelector(`input[name='q${i}']:checked`));$('submitBtn').disabled=!done;}
+
+    /* ===================== Grade & Results ===================== */
+    function grade(){stopTimer();state.answers=Qs.map((_,i)=>parseInt(document.querySelector(`input[name='q${i}']:checked`).value,10));state.score=Qs.filter((q,i)=>q.correctIndex===state.answers[i]).length;Qs.forEach((_,i)=>document.querySelectorAll(`input[name='q${i}']`).forEach(inp=>inp.disabled=true));
+      $('scoreLine').textContent=`Score: ${state.score} / ${Qs.length}`;$('timeLine').textContent=`Total time: ${timerEl.textContent} s`;
+      const sol=$('solutionsScroll');sol.innerHTML='';Qs.forEach((q,i)=>{sol.innerHTML+=`<div style="margin-bottom:1rem"><p>${q.text}</p><p><strong>Correct:</strong> ${String.fromCharCode(65+q.correctIndex)} – ${q.options[q.correctIndex]}</p>${q.note?`<p><em>Note – ${q.note}</em></p>`:''}</div>`;});show('resultsPage');}
+
+    /* ===================== Feedback render ===================== */
+    function renderFeedback(){const form=$('feedbackForm');form.innerHTML='';FBs.forEach(f=>{const field=`<div style="margin-bottom:.75rem"><label>${f.label}</label><br>${[1,2,3,4,5].map(v=>`<label style="margin-right:.5rem"><input type="radio" name="${f.id}" value="${v}">${v}</label>`).join('')}</div>`;form.innerHTML+=field;});form.addEventListener('change',()=>{$('submitFeedbackBtn').disabled=!FBs.some(f=>document.querySelector(`input[name='${f.id}']:checked`));});}
+
+    /* ===================== Summary ===================== */
+    function showSummary(){const summary={score:state.score,total:Qs.length,time_seconds:parseInt(timerEl.textContent,10),answers:state.answers};$('summaryText').textContent='Your responses have been recorded.';$('summaryJson').textContent=JSON.stringify(summary,null,2);show('summaryPage');}
+
+    /* ===================== Navigation helpers ===================== */
+    function show(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');}
+
+    /* ===================== Flow control ===================== */
+    async function startQuiz(){Qs=await loadQuestions();FBs=await loadFeedbackItems();state.answers=[];renderQuiz();renderFeedback();show('quizPage');startTimer();$('submitBtn').onclick=grade;$('toFeedbackBtn').onclick=()=>show('feedbackPage');$('submitFeedbackBtn').onclick=()=>{showSummary();};}
+
+    /* ===================== Bootstrap ===================== */
+    loadIntro();
+  </script>
+</body>
+</html>
