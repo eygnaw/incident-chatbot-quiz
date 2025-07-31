@@ -181,21 +181,72 @@ async function loadIntro() {
 }
 
 /* ------------------ render quiz ------------------ */
-function renderQuiz() { /* unchanged ... */ }
+function renderQuiz(){
+  const box=$('quizScroll');box.innerHTML='';
+  QUESTIONS.forEach((q,qi)=>{
+    const blk=document.createElement('div');blk.style.marginBottom='1rem';
+    blk.innerHTML=`<p class='question'>${q.text}</p>`;
+    const opts=document.createElement('div');opts.className='options';
+    q.options.forEach((opt,oi)=>{
+      const lab=document.createElement('label');
+      lab.innerHTML=`<input type='radio' name='q${qi}' value='${oi}'> ${String.fromCharCode(65+oi)} — ${opt}`;
+      opts.appendChild(lab);
+    });
+    blk.appendChild(opts);box.appendChild(blk);
+  });
+  box.querySelectorAll('input').forEach(inp=>inp.addEventListener('change',checkReady));
+}
+function checkReady(){
+  $('submitBtn').disabled=!QUESTIONS.every((_,i)=>document.querySelector(`input[name='q${i}']:checked`));
+}
 function checkReady() { /* unchanged ... */ }
 
 /* ------------------ grade ------------------ */
-function grade() { /* unchanged ... */ }
+function grade(){
+  stopTimer();
+  state.answers=QUESTIONS.map((_,i)=>+document.querySelector(`input[name='q${i}']:checked`).value);
+  state.score=QUESTIONS.filter((q,i)=>q.correctIndex===state.answers[i]).length;
+  document.querySelectorAll('#quizScroll input').forEach(el=>el.disabled=true);
+  $('scoreLine').textContent=`Score: ${state.score} / ${QUESTIONS.length}`;
+  $('timeLine').textContent=`Total time: ${timerEl.textContent} s`;
+  const sol=$('solutionsScroll');sol.innerHTML='';
+  QUESTIONS.forEach((q,i)=>{
+    sol.innerHTML+=`<div style='margin-bottom:1rem'><p>${q.text}</p><p><strong>Correct:</strong> ${String.fromCharCode(65+q.correctIndex)} – ${q.options[q.correctIndex]}</p>${q.note?`<p><em>Note – ${q.note}</em></p>`:''}</div>`;
+  });
+  show('resultsPage');
+}
 
 /* ------------------ feedback ------------------ */
-function renderFeedback() { /* unchanged ... */ }
+function renderFeedback(){
+  const form=$('feedbackForm');form.innerHTML='';
+  FEEDBACK.forEach((item,idx)=>{
+    const grp=document.createElement('div');grp.style.marginBottom='.75rem';
+    grp.innerHTML=`<label style='font-weight:600'>${item.label}</label><br>`+
+      [1,2,3,4,5].map(v=>`<label style='margin-right:.5rem'><input type='radio' name='fb${idx}' value='${v}'>${v}</label>`).join('');
+    form.appendChild(grp);
+  });
+  form.onchange=()=>{
+    $('submitFeedbackBtn').disabled=!FEEDBACK.every((_,i)=>document.querySelector(`input[name='fb${i}']:checked`));
+  };
+}
+function collectFeedback(){
+  state.feedback=FEEDBACK.map((_,i)=>+document.querySelector(`input[name='fb${i}']:checked`).value);
+}
 function collectFeedback() { /* unchanged ... */ }
 
 /* ------------------ summary & save (Sheets) ------------------ */
-function showSummary() {
+function showSummary(){
   collectFeedback();
-  const summary = {
-    score: `${state.score}/${QUESTIONS.length}`,
+  const summary={
+    score:`${state.score}/${QUESTIONS.length}`,
+    time_seconds:timerEl.textContent,
+    feedback:state.feedback
+  };
+  $('summaryText').textContent='Submission saved to Google Sheets. Preview:';
+  $('summaryJson').textContent=JSON.stringify(summary,null,2);
+  fetch(SHEET_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(summary)}).catch(e=>console.error('Sheet error',e));
+  show('summaryPage');
+}/${QUESTIONS.length}`,
     time_seconds: timerEl.textContent,
     feedback: state.feedback
   };
@@ -212,14 +263,10 @@ function showSummary() {
 }
 
 /* ------------------ nav helper ------------------ */
-function show(id) { /* unchanged ... */ }
+function show(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $(id).classList.add('active');
+}
 
 /* ------------------ main flow ------------------ */
-async function startQuiz() { /* unchanged ... */ }
-
-/* ------------------ bootstrap ------------------ */
-loadIntro();// bootstrap ------------------ */
-    loadIntro();
-  </script>
-</body>
-</html>
+async function startQuiz(){ /*
