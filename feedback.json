@@ -1,5 +1,12 @@
 [
-  { "label": "The agent understood what Iasdfwrote" },
-  { "label": "The agent sdsf what I wrote" },
-  { "label": "asdas what I wrote" }
+  { "label": "The chatbot understood my input" },
+  { "label": "The chatbot responded quickly" },
+  { "label": "The advice was useful" },
+  { "label": "The conversation felt natural" },
+  { "label": "I trust the chatbot's guidance" },
+  { "label": "The quiz instructions were clear" },
+  { "label": "The quiz length was appropriate" },
+  { "label": "I would recommend this tool" },
+  { "label": "I would use this tool again" },
+  { "label": "Overall satisfaction" }
 ]
