@@ -1,12 +1,12 @@
 [
-  { "label": "The chatbot understood my input" },
-  { "label": "The chatbot responded quickly" },
-  { "label": "The advice was useful" },
-  { "label": "The conversation felt natural" },
-  { "label": "I trust the chatbot's guidance" },
-  { "label": "The quiz instructions were clear" },
-  { "label": "The quiz length was appropriate" },
-  { "label": "I would recommend this tool" },
-  { "label": "I would use this tool again" },
-  { "label": "Overall satisfaction" }
+  { "label": "How clearly did the chatbot explain the reasoning behind each answer?" },
+  { "label": "How accurately did the chatbot interpret your input or question?" },
+  { "label": "How well did the chatbot follow the logic of the decision tree?" },
+  { "label": "How effectively did the chatbot help you identify the correct outcome?" },
+  { "label": "How consistent were the chatbot’s responses with the official guidelines?" },
+  { "label": "How easy was it to phrase your question in a way the chatbot understood?" },
+  { "label": "How well did the chatbot maintain a logical flow during the conversation?" },
+  { "label": "How helpful were the chatbot’s answers in addressing your specific case or concern?" },
+  { "label": "How informative were the chatbot’s responses in clarifying your understanding?" },
+  { "label": "How confident did you feel in your decision after using the chatbot?" }
 ]
