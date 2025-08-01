@@ -1,21 +1,167 @@
 [
   {
-    "text": "Q1 placeholder text …",
-    "options": ["Option A","Option B","Option C","Option D"],
+    "text": "A healthcare assistant, angry at a confused dementia patient who repeatedly rang the call bell, entered the room, shouted at the patient, and forcibly restrained them in bed using makeshift ties. The patient was left bruised and crying. The assistant later said the patient 'needed to be taught a lesson.'",
+    "options": [
+      "Verbal warning and additional training on managing challenging behaviour.",
+      "Temporary redeployment to non-patient-facing duties during review.",
+      "Final written warning with behavioural monitoring.",
+      "Immediate dismissal for abuse and referral to safeguarding and regulatory bodies."
+    ],
+    "correctIndex": 3,
+    "note": "Clear and intentional infliction of harm on a vulnerable patient; gross misconduct with no mitigating factors."
+  },
+  {
+    "text": "A nurse, upset over a previous verbal warning from a colleague, deliberately delayed administering prescribed antibiotics to the colleague’s patient, stating, 'Let’s see how they like it when things go wrong.' The patient developed sepsis and required intensive care support.",
+    "options": [
+      "Issue a formal warning and refer to occupational health.",
+      "Refer to mediation services and redeploy temporarily.",
+      "Suspend from clinical duties, initiate disciplinary investigation, and notify the NMC.",
+      "Request a reflective statement and return to supervised practice."
+    ],
+    "correctIndex": 2,
+    "note": "Malicious withholding of care with intent to harm a patient; suspension and professional referral are essential steps in protecting safety and accountability."
+  },
+  {
+    "text": "A senior doctor, frustrated with a junior colleague, deliberately falsified entries in the junior’s patient notes to suggest negligence. The falsified records led to a formal complaint against the junior doctor before the fraud was discovered. The senior later claimed they wanted the junior 'off the team.'",
+    "options": [
+      "Hold a peer review panel and issue formal caution.",
+      "Suspend temporarily and conduct internal review of the department.",
+      "Initiate dismissal proceedings and report to the GMC for breach of professional ethics.",
+      "Refer to occupational health for stress-related support."
+    ],
+    "correctIndex": 2,
+    "note": "Intentional falsification of medical records to damage a colleague’s professional standing; meets criteria for dismissal and regulatory escalation."
+  },
+  {
+    "text": "A mental health nurse administered double the prescribed dose of antipsychotic medication to a patient. It later emerged the nurse had taken codeine brought from home, unaware of how severely it impaired their alertness. This was the first time the nurse had used it at work and they had no history of substance use or medical oversight.",
+    "options": [
+      "Suspend from duty immediately, refer to occupational health and the NMC.",
+      "Issue a verbal warning and recommend over-the-counter alternatives.",
+      "Arrange medicines-management retraining and return to full duties.",
+      "Redeploy temporarily to administrative duties without further action."
+    ],
     "correctIndex": 0,
-    "note": "Why A is correct."
+    "note": "Acute substance misuse without a known condition; caused direct risk to patients. Suspension and referral to occupational health and regulator are necessary."
   },
-  { "text": "Q2 placeholder …", 
-    "options": ["A","B","C","D"], 
-    "correctIndex": 1, 
-    "note": "Why B." 
+  {
+    "text": "An experienced radiographer made a series of scanning errors over two shifts. After the second incident, they collapsed at work. It was discovered they were in the early stages of undiagnosed Type 1 diabetes and had been experiencing dizziness and blurred vision, which they hadn’t disclosed or recognized as serious.",
+    "options": [
+      "Dismiss for repeated errors and failure to declare condition.",
+      "Refer to occupational health, consider temporary restrictions, and monitor recovery.",
+      "Issue a formal warning and assign a training mentor.",
+      "Return to work without adjustments once blood glucose is stabilised."
+    ],
+    "correctIndex": 1,
+    "note": "Undiagnosed medical condition caused performance issues. As the condition was not known, support and health management are the appropriate route, not punishment."
   },
-  { "text": "Q3 placeholder …", "options": ["A","B","C","D"], "correctIndex": 2, "note": "" },
-  { "text": "Q4 placeholder …", "options": ["A","B","C","D"], "correctIndex": 3, "note": "" },
-  { "text": "Q5 placeholder …", "options": ["A","B","C","D"], "correctIndex": 0, "note": "" },
-  { "text": "Q6 placeholder …", "options": ["A","B","C","D"], "correctIndex": 1, "note": "" },
-  { "text": "Q7 placeholder …", "options": ["A","B","C","D"], "correctIndex": 2, "note": "" },
-  { "text": "Q8 placeholder …", "options": ["A","B","C","D"], "correctIndex": 3, "note": "" },
-  { "text": "Q9 placeholder …", "options": ["A","B","C","D"], "correctIndex": 0, "note": "" },
-  { "text": "Q10 placeholder …","options": ["A","B","C","D"], "correctIndex": 1, "note": "" }
+  {
+    "text": "A GP misdiagnosed a patient with chest pain as gastric reflux. It was later confirmed that the GP was under the influence of alcohol at the time. This was the first recorded incident and the GP admitted to drinking heavily due to a recent bereavement. There was no record of prior alcohol misuse or a history of health issues.",
+    "options": [
+      "Suspend from clinical duties, notify the GMC, and refer to occupational health.",
+      "Allow continued practice with weekly supervision and counselling.",
+      "Issue a verbal reprimand with a written apology to the patient.",
+      "Offer leave of absence and no further action required unless repeated."
+    ],
+    "correctIndex": 0,
+    "note": "First-time alcohol misuse with serious clinical impact; condition not previously known. Suspension, regulatory referral, and health intervention are necessary."
+  },
+    {
+    "text": "A senior physiotherapist misjudged a transfer technique with a stroke patient, resulting in a minor fall. The therapist had a history of epilepsy, well-managed with medication, but later reported feeling ‘foggy’ during the session. Occupational health confirmed a brief focal seizure may have occurred, though the therapist had no prior workplace incidents and no awareness of impairment at the time.",
+    "options": [
+      "Dismiss for gross misconduct and refer to the HCPC.",
+      "Refer to occupational health, arrange supervision, and consider reasonable adjustments.",
+      "Suspend until seizure-free for six months and report to regulatory body.",
+      "Take no action as no serious harm occurred."
+    ],
+    "correctIndex": 1,
+    "note": "Known medical condition may have contributed, but no unacceptable risk was taken. Supportive action is appropriate — occupational health referral and supervision."
+  },
+  {
+    "text": "A newly-qualified nurse failed to flush a cannula after IV antibiotic administration, leading to mild infiltration. Protocols clearly stated flushing was mandatory, and the nurse had been trained. She explained she became distracted when the patient’s relative asked for assistance and simply forgot the final step. The omission was caught early, and no significant harm occurred.",
+    "options": [
+      "Final written warning for failure to follow protocol.",
+      "Refer to the NMC and initiate formal investigation.",
+      "Provide corrective training, close supervision, and document performance concerns.",
+      "Allow return to work without any follow-up action."
+    ],
+    "correctIndex": 2,
+    "note": "Protocol was clear and in place, but the nurse did not take an unacceptable risk. This is a lapse, not misconduct — supervision and training are appropriate."
+  },
+  {
+    "text": "A paediatric registrar discharged a child with abdominal pain, who returned 12 hours later with confirmed appendicitis. The registrar had followed local protocols for observation and discharge, but failed to consider atypical signs noted in the handover. On review, consultants agreed most peers would have questioned the presentation more thoroughly. The registrar had completed all required training and had adequate supervision.",
+    "options": [
+      "Dismiss the registrar for unsafe discharge decision.",
+      "Refer to the GMC for clinical negligence.",
+      "Arrange clinical mentoring and reflective practice under senior supervision.",
+      "Take no action, as the child eventually received treatment."
+    ],
+    "correctIndex": 2,
+    "note": "No protocol breach or system failure, but a more experienced peer would likely have acted differently. No unacceptable risk was taken, but clinical judgment needs support."
+  },
+    {
+    "text": "A staff nurse with well-controlled epilepsy failed to administer rescue medication to a seizing patient. She said she had felt a seizure aura earlier in the shift and was trying to 'push through it.' She told no one, remained on duty, and became disoriented during the incident. The patient required escalation and later ICU care. The nurse had been instructed to alert staff if auras occurred.",
+    "options": [
+      "Suspend and refer to occupational health and the NMC.",
+      "Dismiss immediately for gross negligence.",
+      "Issue written warning and return to full duties.",
+      "Take no action due to her medical condition."
+    ],
+    "correctIndex": 0,
+    "note": "Known medical condition with clear instruction to report auras. Nurse chose not to follow that safety plan. This was an unacceptable risk with no mitigating context. Referral and suspension are justified."
+  },
+  {
+    "text": "An experienced anaesthetist failed to check a patient’s allergy history before administering an antibiotic noted in red on the chart. The patient developed anaphylaxis but recovered. The protocol for allergy checks was well established and routinely followed by all staff. The anaesthetist admitted being rushed but made no attempt to confirm history.",
+    "options": [
+      "Issue verbal reminder and allow return to normal duties.",
+      "Dismiss due to high-risk failure.",
+      "Refer to occupational health and arrange wellness coaching.",
+      "Suspend and notify GMC pending disciplinary review."
+    ],
+    "correctIndex": 3,
+    "note": "Protocol was clear, accessible, and routinely followed. Peers would have acted differently. The risk was unacceptable and cannot be excused by pressure alone."
+  },
+  {
+    "text": "A junior doctor inserted a central line without supervision, resulting in a pneumothorax. The trust policy required senior support for such procedures by doctors of their grade. The doctor had completed all training modules and had declined help earlier in the shift. Review confirmed the doctor acted outside competence without pressure or confusion.",
+    "options": [
+      "Refer to GMC, restrict from invasive procedures, and initiate formal performance review.",
+      "Offer clinical mentoring without any formal sanction.",
+      "No further action as complication is a known risk.",
+      "Dismiss for breaching scope of practice."
+    ],
+    "correctIndex": 0,
+    "note": "Doctor acted beyond scope despite training and available supervision. No external factor justified the risk. This warrants formal restriction and regulatory involvement."
+  },
+    {
+    "text": "A midwife administered syntocinon too early during labour, leading to fetal distress. The trust’s recently updated guidelines had not been distributed to all wards, and several staff admitted to using outdated paper copies. A senior midwife confirmed that most staff would have acted similarly given the information available at the time.",
+    "options": [
+      "Suspend the midwife and report to the NMC for unsafe practice.",
+      "Issue a final written warning and initiate disciplinary review.",
+      "Provide reflective training and increase supervision for future inductions.",
+      "Initiate trust-wide protocol dissemination review and support the midwife."
+    ],
+    "correctIndex": 3,
+    "note": "Staff acted reasonably based on available information; updated guidance hadn’t reached practice. A clear system failure — not appropriate for disciplinary action."
+  },
+  {
+    "text": "A newly-qualified doctor failed to recognise a life-threatening electrolyte abnormality on a lab report. Though the abnormality was flagged, the doctor had never received formal training on interpreting electronic lab results. Supervisors had assumed prior knowledge. A senior registrar stated this was a common error among recent graduates.",
+    "options": [
+      "Refer to the GMC for clinical oversight and suspend duties.",
+      "Provide a formal warning and restrict access to independent reporting.",
+      "Review induction training content and provide targeted mentoring.",
+      "No action required — these mistakes are part of learning."
+    ],
+    "correctIndex": 2,
+    "note": "Training gap clearly identified and shared by peers. Mistake arose from poor induction, not personal failure. Requires organisational correction, not individual sanction."
+  },
+  {
+    "text": "An emergency nurse left a patient unmonitored for 45 minutes during a busy night shift. The patient experienced a seizure that went unnoticed. Staffing levels were below safe minimums, and the nurse had asked for support earlier in the shift but none was available. A senior nurse stated most would have prioritised similarly under the same conditions.",
+    "options": [
+      "Issue formal warning for neglect of patient monitoring responsibilities.",
+      "Suspend pending disciplinary investigation into duty of care failure.",
+      "Raise a red flag incident, review staffing policies, and ensure staff support.",
+      "Refer to occupational health and initiate a fitness-to-practise review."
+    ],
+    "correctIndex": 2,
+    "note": "Clear mitigating circumstances due to unsafe staffing. The nurse acted as many peers would have in the situation. Action must focus on system correction and staff safety."
+  }
 ]
