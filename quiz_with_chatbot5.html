@@ -1,8 +1,4 @@
 <!DOCTYPE html>
-<!--  Clinical-Governance Quiz – front-end only
-      Reads questions.json + feedback.json (10-item templates below)
-      Posts summary JSON to Google Sheets Apps Script
--->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -27,27 +23,34 @@ df-messenger{position:fixed;bottom:16px;right:16px;z-index:999}
 </head>
 <body>
 
-<!-- Page containers -->
-<div id="introPage"  class="page active container"></div>
+<!-- Page 1 Intro -->
+<div id="introPage" class="page active container"></div>
 
-<div id="quizPage"   class="page container">
+<!-- Page 2 Quiz -->
+<div id="quizPage" class="page container">
   <div>Time: <span id="timer">0.0</span>s</div>
-  <div id="quizBox"  class="scroll-area"></div>
+  <div id="quizBox" class="scroll-area"></div>
   <button id="quizSubmit" class="btn" disabled>Submit</button>
 </div>
 
+<!-- Page 3 Results -->
 <div id="resultPage" class="page container">
-  <h2>Results</h2><p id="score"></p><p id="elapsed"></p>
+  <h2>Results</h2>
+  <p id="elapsed"></p>
   <div id="solutions" class="scroll-area"></div>
   <button id="toFb" class="btn">Feedback</button>
 </div>
 
-<div id="fbPage"    class="page container">
+<!-- Page 4 Feedback -->
+<div id="fbPage" class="page container">
   <h2>Your Feedback</h2>
-  <form id="fbForm"  class="scroll-area" style="max-height:50vh"></form>
-  <button id="fbSubmit" class="btn" disabled style="margin-top:1rem">Submit feedback</button>
+  <form id="fbForm" class="scroll-area" style="max-height:50vh"></form>
+  <label style="font-weight:600">Additional comments (optional)</label><br>
+  <textarea id="fbText" rows="3" style="width:100%;border:1px solid #ccc;border-radius:4px;margin-bottom:1rem"></textarea>
+  <button id="fbSubmit" class="btn" disabled>Submit feedback</button>
 </div>
 
+<!-- Page 5 Summary -->
 <div id="thanksPage" class="page container">
   <h2>Thank you</h2>
   <pre id="summary" style="white-space:pre-wrap;background:#fff;padding:1rem;border-radius:6px"></pre>
@@ -65,48 +68,45 @@ df-messenger{position:fixed;bottom:16px;right:16px;z-index:999}
 
 <script>
 /* ---------- CONFIG ---------- */
-const VER = '2025-08-03';    // bump when JSON files change
+const VER = '2025-08-04';   // bump when JSON files change
 const SHEET_ENDPOINT =
   'https://script.google.com/macros/s/AKfycbzhWALkZL3vWhxfacbEnJNWQ7o4OoJ1ZaPtU-eTniXCBSaey4EG1u_tVbY3ZG8umepF/exec';
 
 /* ---------- HELPERS ---------- */
-const $       = id => document.getElementById(id);
-const getJSON = p => fetch(`${p}?v=${VER}`,{cache:'no-cache'}).then(r=>r.json());
-const getHTML = p => fetch(`${p}?v=${VER}`,{cache:'no-cache'}).then(r=>r.text());
-const show    = id => {document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');};
+const $  = id => document.getElementById(id);
+const J  = p  => fetch(`${p}?v=${VER}`,{cache:'no-cache'}).then(r=>r.json());
+const H  = p  => fetch(`${p}?v=${VER}`,{cache:'no-cache'}).then(r=>r.text());
+const show = id => {document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');};
 
 /* ---------- STATE ---------- */
 let Q=[], FB=[];
-const S = {ans:[], fb:[], start:0, score:0};
+const S={ans:[],fb:[],comment:'',start:0};
 
 /* ---------- TIMER ---------- */
-const t=$('timer'); let tick;
+let tick; const t=$('timer');
 const start=()=>{S.start=Date.now();tick=setInterval(()=>t.textContent=((Date.now()-S.start)/1000).toFixed(1),100);}
 const stop =()=>clearInterval(tick);
 
 /* ---------- BUILD QUIZ ---------- */
 function buildQuiz(){
   const box=$('quizBox'); box.innerHTML='';
-  Q.forEach((q,qi)=>{
-    box.insertAdjacentHTML('beforeend',`
-      <p class="question">${q.text}</p>
-      ${q.options.map((o,oi)=>`<label><input type="radio" name="q${qi}" value="${oi}"> ${String.fromCharCode(65+oi)} — ${o}</label><br>`).join('')}
-      <hr>`);});
-  box.querySelectorAll('input').forEach(i=>i.addEventListener('change',readyCheck));
+  Q.forEach((q,qi)=>box.insertAdjacentHTML('beforeend',`
+    <p class="question">${q.text}</p>
+    ${q.options.map((o,oi)=>`<label><input type="radio" name="q${qi}" value="${oi}"> ${String.fromCharCode(65+oi)} — ${o}</label><br>`).join('')}
+    <hr>`));
+  box.querySelectorAll('input').forEach(i=>i.addEventListener('change',()=>$('quizSubmit').disabled=!Q.every((_,i)=>document.querySelector(`input[name='q${i}']:checked`))));
 }
-function readyCheck(){ $('quizSubmit').disabled = !Q.every((_,i)=>document.querySelector(`input[name='q${i}']:checked`)); }
 
 /* ---------- GRADE ---------- */
 function grade(){
   stop();
   S.ans = Q.map((_,i)=>+document.querySelector(`input[name='q${i}']:checked`).value);
-  S.score = Q.filter((q,i)=>q.correctIndex===S.ans[i]).length;
-  document.querySelectorAll('#quizBox input').forEach(i=>i.disabled=true);
-  $('score').textContent   = `Score: ${S.score}/${Q.length}`;
+  const correctVec = Q.map((q,i)=>q.correctIndex===S.ans[i]?1:0);
   $('elapsed').textContent = `Time: ${t.textContent}s`;
   const sol=$('solutions'); sol.innerHTML='';
   Q.forEach((q,i)=>sol.insertAdjacentHTML('beforeend',`
     <p>${q.text}<br><strong>Correct:</strong> ${String.fromCharCode(65+q.correctIndex)} – ${q.options[q.correctIndex]}</p>`));
+  S.correct = correctVec;
   show('resultPage');
 }
 
@@ -119,20 +119,28 @@ function buildFB(){
     <hr>`));
   f.onchange=()=>$('fbSubmit').disabled=!FB.every((_,i)=>document.querySelector(`input[name='fb${i}']:checked`));
 }
-const grabFB=()=>S.fb=FB.map((_,i)=>+document.querySelector(`input[name='fb${i}']:checked`).value);
+const grabFB=()=>{
+  S.fb = FB.map((_,i)=>+document.querySelector(`input[name='fb${i}']:checked`).value);
+  S.comment = $('fbText').value.trim();
+};
 
 /* ---------- SAVE ---------- */
 function finish(){
   grabFB();
-  const summary={score:`${S.score}/${Q.length}`,time_seconds:t.textContent,feedback:S.fb};
+  const summary={
+    correct:S.correct,               // vector of 0/1
+    time_seconds:t.textContent,
+    feedback:S.fb,
+    comment:S.comment
+  };
   $('summary').textContent=JSON.stringify(summary,null,2);
   fetch(SHEET_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(summary)});
   show('thanksPage');
 }
 
-/* ---------- INIT QUIZ ---------- */
+/* ---------- INIT ---------- */
 async function initQuiz(){
-  [Q,FB]=await Promise.all([getJSON('questions.json'),getJSON('feedback.json')]);
+  [Q,FB]=await Promise.all([J('questions.json'),J('feedback.json')]);
   buildQuiz(); buildFB(); show('quizPage'); start();
   $('quizSubmit').onclick=grade;
   $('toFb').onclick      =()=>show('fbPage');
@@ -140,8 +148,7 @@ async function initQuiz(){
 }
 
 /* ---------- BOOT ---------- */
-getHTML('intro.html').then(t=>{$('introPage').innerHTML=t+'<button class="btn" id="begin">Begin</button>';
-$('begin').onclick=initQuiz;});
+H('intro.html').then(t=>{$('introPage').innerHTML=t+'<button class="btn" id="begin">Begin</button>'; $('begin').onclick=initQuiz;});
 </script>
 </body>
 </html>
