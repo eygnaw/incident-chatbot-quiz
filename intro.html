@@ -1,24 +1,39 @@
-<!-- intro.html -->
-<section>
-  <h1>Incident Decision-Making Quiz</h1>
+<!-- intro.html  (drop-in) -->
+<section style="max-width:720px;margin:auto">
+  <h1>Incident-Decision Quiz</h1>
 
   <p>
-    This quiz presents short clinical-governance scenarios drawn from the
-    <em>Incident Decision Tree</em>. For each situation you must choose the
-    management option you believe is safest and most proportionate.
+    To assess the effectiveness of the conversational AI system in managing incidents dynamically and accommodating user preferences, a quiz was created with 15 simulated scenarios. 
+    We are going to evaluate the response time (time took to answer the quiz), error rate (picking the wrong action to take), and user satisfaction (based on the feedback rating and user comments).
+    This first version of the quiz has only 15 questions and the guideline pdf attached. Comments are welcomed for improvements before the final version of our evaluation system.
+    We will afterwards split the quiz into chatbot only version and a guideline only version for a direct comparasion between the two, while also having a larger pool of scenarios.
   </p>
+  <ol>
+    <li><strong>IDT Chatbot</strong> – ask it anything about incident management.</li>
+    <li><strong>Quick-reference image</strong> – flow-chart snapshot below.</li>
+    <li><strong>Guideline PDF</strong> – opens the full
+        <a href="incident-decision-tree-guideline.pdf" target="_blank">Incident Decision Tree guide</a>
+        in a new tab.</li>
+  </ol>
 
-  <h2>How it works</h2>
+  <!-- PNG lives next to the HTML file -->
+  <figure>
+    <img src="idt_flow_small.png" alt="Incident Decision Tree flow-chart thumbnail"
+         style="max-width:100%;border:1px solid #ccc;border-radius:4px">
+    <figcaption style="font-size:.9rem">
+      Click the image for the full PDF if you prefer a larger view.
+    </figcaption>
+  </figure>
+
+  <h2>How the quiz works</h2>
   <ul>
-    <li>All questions appear on a single scrollable page.</li>
-    <li>The timer starts when you press “Begin” and stops when you submit.</li>
-    <li>You cannot change answers after submission, but you will see explanations for every scenario.</li>
-    <li>The IDT chatbot stays visible on the right—use it at any point for guidance.</li>
+    <li>All questions load on one scrollable page; answer each then press <em>Submit</em>.</li>
+    <li>The timer starts when you press “Begin” and stops at submission.</li>
+    <li>After submitting you’ll see: score, detailed solutions, plus links back to the PDF/chatbot.</li>
   </ul>
 
-  <h2>Your data</h2>
+  <h2>About your data</h2>
   <p>
-    Your choices and feedback are recorded anonymously for service-improvement
-    only. No personal identifiers are stored.
+    The choices, timings, and anonymous feedback are stored for analysis.
   </p>
 </section>
