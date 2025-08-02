@@ -147,7 +147,8 @@ function finish(){
     `<strong>Feedback average:</strong> ${fbAvg}`+
     (S.comment?`<br><strong>Your comment:</strong> ${S.comment}`:'');
 
-  $('vectorBox').textContent=JSON.stringify(S.correct,null,2);
+  /* raw row exactly as stored (timestamp + 0/1s + feedback + time + score + avg + comment) */
+  $('vectorBox').textContent = JSON.stringify(row, null, 2);
   $('summaryRow').textContent=JSON.stringify(row,null,2); // hidden but keeps old preview if needed
   $('toggleVector').onclick=()=>{
     const box=$('vectorBox');const btn=$('toggleVector');const open=box.style.display==='block';
