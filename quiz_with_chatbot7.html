@@ -1,213 +1,174 @@
 <!DOCTYPE html>
+<!-- quiz_with_chatbot.html – all‑in‑one front‑end 
+     Place in same folder:
+       intro.html                     – intro content (see separate file)
+       idt_flow_small.png             – thumbnail shown on intro
+       incident-decision-tree-guideline.pdf – full guideline opened via link
+       questions.json                 – scenario bank
+       feedback.json                  – feedback prompts
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Clinical Governance Quiz</title>
+<title>Incident Decision Quiz</title>
 
 <!-- Dialogflow CX widget -->
-<link rel="stylesheet"
-      href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+<link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
 <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
 
 <style>
 body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0 380px 0 0;background:#f9fafb}
 .container{max-width:800px;margin:0 auto;padding:2rem}
 .page{display:none}.page.active{display:block}
-.btn{padding:.6rem 1.4rem;background:#1e40af;color:#fff;border:none;border-radius:6px;font-weight:600;cursor:pointer}
+.btn{padding:.6rem 1.4rem;background:#1e40af;color:#fff;border:none;border-radius:6px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .btn:disabled{opacity:.6;cursor:not-allowed}
 .scroll-area{max-height:70vh;overflow-y:auto;border:1px solid #ddd;background:#fff;padding:1rem;margin-bottom:1rem;border-radius:6px}
+pre{white-space:pre-wrap}
 df-messenger{position:fixed;bottom:16px;right:16px;z-index:999}
 @media(max-width:900px){body{padding:0}df-messenger{left:0;right:0;width:100%;height:55%}}
 </style>
 </head>
 <body>
 
-<!-- Page 1 Intro -->
+<!-- Intro -->
 <div id="introPage" class="page active container"></div>
 
-<!-- Page 2 Quiz -->
+<!-- Quiz -->
 <div id="quizPage" class="page container">
   <div>Time: <span id="timer">0.0</span>s</div>
   <div id="quizBox" class="scroll-area"></div>
-  <button id="quizSubmit" class="btn" disabled>Submit</button>
+  <button id="quizSubmit" class="btn" disabled>Submit answers</button>
 </div>
 
-<!-- Page 3 Results -->
+<!-- Results -->
 <div id="resultPage" class="page container">
-  <h2>Results</h2>
-  <p id="elapsed"></p>                   <!-- already there -->
-  <p id="scoreFrac"></p>                 <!-- new line -->
-  <button id="toggleRaw" class="btn" style="margin-bottom:1rem">Show raw data</button>
-  <pre id="rawBox" style="display:none;background:#f4f4f4;padding:1rem;border-radius:6px"></pre>
+  <h2>Solutions</h2>
+  <p id="scoreLine"></p>
   <div id="solutions" class="scroll-area"></div>
-  <button id="toFb" class="btn">Feedback</button>
+  <button id="toFb" class="btn">Give feedback</button>
 </div>
 
-<!-- Page 4 Feedback -->
+<!-- Feedback -->
 <div id="fbPage" class="page container">
-  <h2>Your Feedback</h2>
+  <h2>Your feedback</h2>
   <form id="fbForm" class="scroll-area" style="max-height:50vh"></form>
   <label style="font-weight:600">Additional comments (optional)</label><br>
   <textarea id="fbText" rows="3" style="width:100%;border:1px solid #ccc;border-radius:4px;margin-bottom:1rem"></textarea>
   <button id="fbSubmit" class="btn" disabled>Submit feedback</button>
 </div>
 
-<!-- Page 5 Summary -->
+<!-- Thank‑you / summary -->
 <div id="thanksPage" class="page container">
   <h2>Thank you</h2>
-  <pre id="summary" style="white-space:pre-wrap;background:#fff;padding:1rem;border-radius:6px"></pre>
+  <p id="humanSummary"></p>
+  <button id="toggleVector" class="btn" style="margin-bottom:1rem">Show raw vector</button>
+  <pre id="vectorBox" style="display:none;background:#f4f4f4;padding:1rem;border-radius:6px"></pre>
+  <pre id="summaryRow" style="display:none"></pre>
 </div>
 
 <!-- Chatbot -->
-<df-messenger
-  location="europe-west2"
-  project-id="incident-decision-tree-as-sppe"
-  agent-id="dfdb170b-7667-470a-81c3-3dfaa2488c5b"
-  language-code="en"
-  allow-feedback="all">
+<df-messenger location="europe-west2" project-id="incident-decision-tree-as-sppe" agent-id="dfdb170b-7667-470a-81c3-3dfaa2488c5b" language-code="en" allow-feedback="all">
   <df-messenger-chat-bubble chat-title="IDT"></df-messenger-chat-bubble>
 </df-messenger>
 
 <script>
-/* ───── CONFIG ───── */
-const VER = '2025-08-05';
-const SHEET_ENDPOINT =
-  'https://script.google.com/macros/s/AKfycbzhWALkZL3vWhxfacbEnJNWQ7o4OoJ1ZaPtU-eTniXCBSaey4EG1u_tVbY3ZG8umepF/exec';
+/* ─── CONFIG ─── */
+const VER='2025-08-06'; // bump when JSON changes to bust cache
+const SHEET_ENDPOINT='https://script.google.com/macros/s/AKfycbzhWALkZL3vWhxfacbEnJNWQ7o4OoJ1ZaPtU-eTniXCBSaey4EG1u_tVbY3ZG8umepF/exec';
 
-/* ───── helpers ───── */
-const $ = id => document.getElementById(id);
-const J = p  => fetch(`${p}?v=${VER}`,{cache:'no-cache'}).then(r=>r.json());
-const H = p  => fetch(`${p}?v=${VER}`,{cache:'no-cache'}).then(r=>r.text());
-const show = id => {document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');};
+/* ─── helpers ─── */
+const $=id=>document.getElementById(id);
+const J=p=>fetch(`${p}?v=${VER}`,{cache:'no-cache'}).then(r=>r.json());
+const H=p=>fetch(`${p}?v=${VER}`,{cache:'no-cache'}).then(r=>r.text());
+const show=id=>{document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');};
 
-/* ───── state ───── */
-let Q=[], FB=[];
-const S = {ans:[], fb:[], comment:'', start:0, correct:[]};
+/* ─── state ─── */
+let Q=[],FB=[];
+const S={ans:[],correct:[],fb:[],comment:'',start:0};
 
-/* ───── timer ───── */
-let tick; const t=$('timer');
+/* ── timer ── */
+let tick;const t=$('timer');
 const start=()=>{S.start=Date.now();tick=setInterval(()=>t.textContent=((Date.now()-S.start)/1000).toFixed(1),100)};
 const stop =()=>clearInterval(tick);
 
-/* ───── quiz build ───── */
+/* ── build quiz ── */
 function buildQuiz(){
-  const box=$('quizBox'); box.innerHTML='';
+  const box=$('quizBox');box.innerHTML='';
   Q.forEach((q,qi)=>{
     box.insertAdjacentHTML('beforeend',
       `<p class="question">${q.text}</p>`+
-      q.options.map((o,oi)=>
-        `<label><input type="radio" name="q${qi}" value="${oi}"> ${String.fromCharCode(65+oi)} — ${o}</label><br>`
-      ).join('')+
+      q.options.map((o,oi)=>`<label><input type="radio" name="q${qi}" value="${oi}"> ${String.fromCharCode(65+oi)} — ${o}</label><br>`).join('')+
       '<hr>');
   });
-  box.querySelectorAll('input')
-     .forEach(i=>i.addEventListener('change',()=>{$('quizSubmit').disabled=!Q.every((_,i)=>document.querySelector(`input[name='q${i}']:checked`));}));
+  box.querySelectorAll('input').forEach(i=>i.addEventListener('change',()=>{$('quizSubmit').disabled=!Q.every((_,i)=>document.querySelector(`input[name='q${i}']:checked`));}));
 }
 
-/* ───── grade ───── */
+/* ── grade ── */
 function grade(){
   stop();
-  S.ans     = Q.map((_,i)=>+document.querySelector(`input[name='q${i}']:checked`).value);
-  S.correct = Q.map((q,i)=>q.correctIndex===S.ans[i]?1:0);
-  const score = S.correct.reduce((a,b)=>a+b,0);
-  $('scoreFrac').textContent = `Score ${score}/${Q.length}`;
-
-  $('elapsed').textContent = `Score ${score}/${Q.length} · Time ${t.textContent}s`;
-
-  const sol=$('solutions'); sol.innerHTML='';
-  Q.forEach((q,i)=>{
-    sol.insertAdjacentHTML('beforeend',
-      `<p>${q.text}</p>`+
-      `<p><strong>Correct:</strong> ${String.fromCharCode(65+q.correctIndex)} – ${q.options[q.correctIndex]}</p>`+
-      (q.note ? `<p><em>${q.note}</em></p>` : '')+
-      '<hr>');
-  });
-
-  // fill rawBox for later
-  $('rawBox').textContent = JSON.stringify(S.correct, null, 2);
-  
-  // toggle button
-  $('toggleRaw').onclick = ()=>{
-    const box = $('rawBox');
-    const btn = $('toggleRaw');
-    const open = box.style.display === 'block';
-    box.style.display = open ? 'none' : 'block';
-    btn.textContent   = open ? 'Show raw data' : 'Hide raw data';
-  };
-  
+  S.ans=Q.map((_,i)=>+document.querySelector(`input[name='q${i}']:checked`).value);
+  S.correct=Q.map((q,i)=>q.correctIndex===S.ans[i]?1:0);
+  const score=S.correct.reduce((a,b)=>a+b,0);
+  $('scoreLine').textContent=`You answered ${score} of ${Q.length} correctly (time ${t.textContent}s).`;
+  const sol=$('solutions');sol.innerHTML='';
+  Q.forEach((q,i)=>sol.insertAdjacentHTML('beforeend',
+    `<p>${q.text}</p><p><strong>Correct:</strong> ${String.fromCharCode(65+q.correctIndex)} – ${q.options[q.correctIndex]}</p>`+
+    (q.note?`<p><em>${q.note}</em></p>`:'')+'<hr>'));
   show('resultPage');
 }
 
-/* ───── feedback build ───── */
+/* ── feedback page build ── */
 function buildFB(){
-  const f=$('fbForm'); f.innerHTML='';
-  FB.forEach((item,i)=>{
-    f.insertAdjacentHTML('beforeend',
-      `<p style="font-weight:600">${item.label}</p>`+
-      [1,2,3,4,5].map(v=>`<label style="margin-right:.5rem"><input type="radio" name="fb${i}" value="${v}">${v}</label>`).join('')+
-      '<hr>');
-  });
-  f.onchange = ()=>$('fbSubmit').disabled=!FB.every((_,i)=>document.querySelector(`input[name='fb${i}']:checked`));
+  const f=$('fbForm');f.innerHTML='';
+  FB.forEach((item,i)=>f.insertAdjacentHTML('beforeend',
+    `<p style="font-weight:600">${item.label}</p>`+
+    [1,2,3,4,5].map(v=>`<label style="margin-right:.5rem"><input type="radio" name="fb${i}" value="${v}">${v}</label>`).join('')+
+    '<hr>'));
+  f.onchange=()=>$('fbSubmit').disabled=!FB.every((_,i)=>document.querySelector(`input[name='fb${i}']:checked`));
 }
-const grabFB = ()=>{
-  S.fb      = FB.map((_,i)=>+document.querySelector(`input[name='fb${i}']:checked`).value);
-  S.comment = $('fbText').value.trim();
-};
+const grabFB=()=>{S.fb=FB.map((_,i)=>+document.querySelector(`input[name='fb${i}']:checked`).value);S.comment=$('fbText').value.trim();};
 
-/* ───── save to sheet (flat row) ───── */
-function finish () {
+/* ── finish & save ── */
+function finish(){
   grabFB();
+  const now=new Date(),pad=n=>n.toString().padStart(2,'0');
+  const stamp=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const score=S.correct.reduce((a,b)=>a+b,0);
+  const fbAvg=(S.fb.reduce((a,b)=>a+b,0)/S.fb.length).toFixed(2);
 
-  /* pretty timestamp  YYYY-MM-DD HH:MM */
-  const now  = new Date();
-  const pad  = n => n.toString().padStart(2,'0');
-  const stamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} `+
-                `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const row=[stamp,...S.correct,...S.fb,t.textContent,`${score}/${Q.length}`,fbAvg,S.comment];
 
-  const score = S.correct.reduce((a,b)=>a+b,0);              // number right
-  const scoreFrac = `${score}/${Q.length}`;                  // “7/15”
-  const fbAvg = (S.fb.reduce((a,b)=>a+b,0)/S.fb.length).toFixed(2);
+  /* user‑readable summary */
+  $('humanSummary').innerHTML=
+    `<strong>Date:</strong> ${stamp}<br>`+
+    `<strong>Score:</strong> ${score}/${Q.length}<br>`+
+    `<strong>Time:</strong> ${t.textContent}s<br>`+
+    `<strong>Feedback average:</strong> ${fbAvg}`+
+    (S.comment?`<br><strong>Your comment:</strong> ${S.comment}`:'');
 
-  const row = [
-    stamp,                 // timestamp
-    ...S.correct,          // 0/1 per question
-    ...S.fb,               // feedback ratings
-    t.textContent,         // total time (seconds, 1-dp)
-    scoreFrac,             // column “score_fraction”
-    fbAvg,                 // column “fb_avg”
-    S.comment              // free-text comment
-  ];
+  $('vectorBox').textContent=JSON.stringify(S.correct,null,2);
+  $('summaryRow').textContent=JSON.stringify(row,null,2); // hidden but keeps old preview if needed
+  $('toggleVector').onclick=()=>{
+    const box=$('vectorBox');const btn=$('toggleVector');const open=box.style.display==='block';
+    box.style.display=open?'none':'block';
+    btn.textContent=open?'Show raw vector':'Hide raw vector';};
 
-  /* show preview for the user */
-  $('summary').textContent = JSON.stringify(row, null, 2);
-
-  /* POST to Google Sheets */
-  fetch(SHEET_ENDPOINT, {
-    method : 'POST',
-    mode   : 'no-cors',
-    headers: { 'Content-Type':'application/json' },
-    body   : JSON.stringify(row)
-  });
-
+  fetch(SHEET_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(row)});
   show('thanksPage');
 }
 
-
-
-/* ───── init ───── */
+/* ── init ── */
 async function initQuiz(){
   [Q,FB]=await Promise.all([J('questions.json'),J('feedback.json')]);
-  buildQuiz(); buildFB(); show('quizPage'); start();
+  buildQuiz();buildFB();show('quizPage');start();
   $('quizSubmit').onclick=grade;
-  $('toFb').onclick      =()=>show('fbPage');
-  $('fbSubmit').onclick  =finish;
+  $('toFb').onclick=()=>show('fbPage');
+  $('fbSubmit').onclick=finish;
 }
 
-/* ───── bootstrap ───── */
-H('intro.html').then(t=>{$('introPage').innerHTML=t+'<button class="btn" id="begin">Begin</button>'; $('begin').onclick=initQuiz;});
+/* ── bootstrap intro ── */
+H('intro.html').then(txt=>{$('introPage').innerHTML=txt+'<button class="btn" id="begin">Begin</button>';$('begin').onclick=initQuiz;});
 </script>
-
-
 </body>
 </html>
