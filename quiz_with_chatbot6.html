@@ -139,35 +139,43 @@ const grabFB = ()=>{
 };
 
 /* ───── save to sheet (flat row) ───── */
-function finish() {
+function finish () {
   grabFB();
 
-  // helper: YYYY-MM-DD HH:MM (pad with zeroes)
+  /* pretty timestamp  YYYY-MM-DD HH:MM */
   const now  = new Date();
-  const pad  = n => n.toString().padStart(2, '0');
-  const nice = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ` +
-               `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const pad  = n => n.toString().padStart(2,'0');
+  const stamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} `+
+                `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+  const score = S.correct.reduce((a,b)=>a+b,0);              // number right
+  const scoreFrac = `${score}/${Q.length}`;                  // “7/15”
+  const fbAvg = (S.fb.reduce((a,b)=>a+b,0)/S.fb.length).toFixed(2);
 
   const row = [
-    nice,                          // timestamp column A
-    ...S.correct,                  // question 1 … question 15
-    ...S.fb,                       // feedback 1 … feedback 10
-    t.textContent,                 // time column (seconds with 1-dp)
-    (S.fb.reduce((a,b)=>a+b,0)/S.fb.length).toFixed(2), // feedback average
-    S.comment                      // free-text comment
+    stamp,                 // timestamp
+    ...S.correct,          // 0/1 per question
+    ...S.fb,               // feedback ratings
+    t.textContent,         // total time (seconds, 1-dp)
+    scoreFrac,             // column “score_fraction”
+    fbAvg,                 // column “fb_avg”
+    S.comment              // free-text comment
   ];
 
+  /* show preview for the user */
   $('summary').textContent = JSON.stringify(row, null, 2);
 
+  /* POST to Google Sheets */
   fetch(SHEET_ENDPOINT, {
-    method: 'POST',
-    mode:   'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(row)
+    method : 'POST',
+    mode   : 'no-cors',
+    headers: { 'Content-Type':'application/json' },
+    body   : JSON.stringify(row)
   });
 
   show('thanksPage');
 }
+
 
 
 /* ───── init ───── */
