@@ -68,33 +68,38 @@ df-messenger{position:fixed;bottom:16px;right:16px;z-index:999}
 
 <script>
 /* ───── CONFIG ───── */
-const VER = '2025-08-05';                         // bump when JSON files change
+const VER = '2025-08-05';
 const SHEET_ENDPOINT =
   'https://script.google.com/macros/s/AKfycbzhWALkZL3vWhxfacbEnJNWQ7o4OoJ1ZaPtU-eTniXCBSaey4EG1u_tVbY3ZG8umepF/exec';
 
 /* ───── helpers ───── */
-const $   = id => document.getElementById(id);
-const J   = p  => fetch(`${p}?v=${VER}`,{cache:'no-cache'}).then(r=>r.json());
-const H   = p  => fetch(`${p}?v=${VER}`,{cache:'no-cache'}).then(r=>r.text());
-const show= id => {document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');};
+const $ = id => document.getElementById(id);
+const J = p  => fetch(`${p}?v=${VER}`,{cache:'no-cache'}).then(r=>r.json());
+const H = p  => fetch(`${p}?v=${VER}`,{cache:'no-cache'}).then(r=>r.text());
+const show = id => {document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');};
 
 /* ───── state ───── */
 let Q=[], FB=[];
-const S={ans:[], fb:[], comment:'', start:0, correct:[]};
+const S = {ans:[], fb:[], comment:'', start:0, correct:[]};
 
 /* ───── timer ───── */
 let tick; const t=$('timer');
-const start=()=>{S.start=Date.now();tick=setInterval(()=>t.textContent=((Date.now()-S.start)/1000).toFixed(1),100);}
+const start=()=>{S.start=Date.now();tick=setInterval(()=>t.textContent=((Date.now()-S.start)/1000).toFixed(1),100)};
 const stop =()=>clearInterval(tick);
 
 /* ───── quiz build ───── */
 function buildQuiz(){
   const box=$('quizBox'); box.innerHTML='';
-  Q.forEach((q,qi)=>box.insertAdjacentHTML('beforeend',`
-        <p class="question">${q.text}</p>
-        ${q.options.map((o,oi)=>`<label><input type="radio" name="q${qi}" value="${oi}"> ${String.fromCharCode(65+oi)} — ${o}</label><br>`).join('')}
-        <hr>`));
-  box.querySelectorAll('input').forEach(i=>i.addEventListener('change',()=>{$('quizSubmit').disabled=!Q.every((_,i)=>document.querySelector(\`input[name='q\${i}']:checked\`))}));
+  Q.forEach((q,qi)=>{
+    box.insertAdjacentHTML('beforeend',
+      `<p class="question">${q.text}</p>`+
+      q.options.map((o,oi)=>
+        `<label><input type="radio" name="q${qi}" value="${oi}"> ${String.fromCharCode(65+oi)} — ${o}</label><br>`
+      ).join('')+
+      '<hr>');
+  });
+  box.querySelectorAll('input')
+     .forEach(i=>i.addEventListener('change',()=>{$('quizSubmit').disabled=!Q.every((_,i)=>document.querySelector(`input[name='q${i}']:checked`));}));
 }
 
 /* ───── grade ───── */
@@ -107,63 +112,62 @@ function grade(){
   $('elapsed').textContent = `Score ${score}/${Q.length} · Time ${t.textContent}s`;
 
   const sol=$('solutions'); sol.innerHTML='';
-  Q.forEach((q,i)=>sol.insertAdjacentHTML('beforeend',`
-    <p>${q.text}</p>
-    <p><strong>Correct:</strong> ${String.fromCharCode(65+q.correctIndex)} – ${q.options[q.correctIndex]}</p>
-    ${q.note?`<p><em>${q.note}</em></p>`:''}
-    <hr>`));
+  Q.forEach((q,i)=>{
+    sol.insertAdjacentHTML('beforeend',
+      `<p>${q.text}</p>`+
+      `<p><strong>Correct:</strong> ${String.fromCharCode(65+q.correctIndex)} – ${q.options[q.correctIndex]}</p>`+
+      (q.note ? `<p><em>${q.note}</em></p>` : '')+
+      '<hr>');
+  });
   show('resultPage');
 }
 
 /* ───── feedback build ───── */
 function buildFB(){
   const f=$('fbForm'); f.innerHTML='';
-  FB.forEach((item,i)=>f.insertAdjacentHTML('beforeend',`
-    <p style="font-weight:600">${item.label}</p>
-    ${[1,2,3,4,5].map(v=>`<label style="margin-right:.5rem"><input type="radio" name="fb${i}" value="${v}">${v}</label>`).join('')}
-    <hr>`));
-  f.onchange=()=>$('fbSubmit').disabled=!FB.every((_,i)=>document.querySelector(`input[name='fb${i}']:checked`));
+  FB.forEach((item,i)=>{
+    f.insertAdjacentHTML('beforeend',
+      `<p style="font-weight:600">${item.label}</p>`+
+      [1,2,3,4,5].map(v=>`<label style="margin-right:.5rem"><input type="radio" name="fb${i}" value="${v}">${v}</label>`).join('')+
+      '<hr>');
+  });
+  f.onchange = ()=>$('fbSubmit').disabled=!FB.every((_,i)=>document.querySelector(`input[name='fb${i}']:checked`));
 }
-const grabFB=()=>{
+const grabFB = ()=>{
   S.fb      = FB.map((_,i)=>+document.querySelector(`input[name='fb${i}']:checked`).value);
   S.comment = $('fbText').value.trim();
 };
 
-/* ───── save to sheets ───── */
+/* ───── save to sheet (flat row) ───── */
 function finish(){
   grabFB();
-  /* build flat row in required column order */
   const row = [
-    new Date().toISOString(),           // timestamp
-    ...S.correct,                       // question 1 … question 15
-    ...S.fb,                            // feedback 1 … feedback 10
-    t.textContent,                      // time
-    `${S.correct.reduce((a,b)=>a+b,0)}/${Q.length}`, // fraction
-    (S.fb.reduce((a,b)=>a+b,0)/S.fb.length).toFixed(2), // feedback average
-    S.comment                           // comment
+    new Date().toISOString(),
+    ...S.correct,
+    ...S.fb,
+    t.textContent,
+    `${S.correct.reduce((a,b)=>a+b,0)}/${Q.length}`,
+    (S.fb.reduce((a,b)=>a+b,0)/S.fb.length).toFixed(2),
+    S.comment
   ];
-
-  $('summary').textContent = JSON.stringify(row,null,2);
-  fetch(SHEET_ENDPOINT,{
-    method:'POST',mode:'no-cors',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(row)
-  });
+  $('summary').textContent=JSON.stringify(row,null,2);
+  fetch(SHEET_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(row)});
   show('thanksPage');
 }
 
 /* ───── init ───── */
 async function initQuiz(){
-  [Q,FB] = await Promise.all([J('questions.json'),J('feedback.json')]);
+  [Q,FB]=await Promise.all([J('questions.json'),J('feedback.json')]);
   buildQuiz(); buildFB(); show('quizPage'); start();
   $('quizSubmit').onclick=grade;
   $('toFb').onclick      =()=>show('fbPage');
   $('fbSubmit').onclick  =finish;
 }
 
-/* ───── boot intro ───── */
-H('intro.html').then(t=>{$('introPage').innerHTML=t+'<button class="btn" id="begin">Begin</button>';$('begin').onclick=initQuiz;});
+/* ───── bootstrap ───── */
+H('intro.html').then(t=>{$('introPage').innerHTML=t+'<button class="btn" id="begin">Begin</button>'; $('begin').onclick=initQuiz;});
 </script>
+
 
 </body>
 </html>
