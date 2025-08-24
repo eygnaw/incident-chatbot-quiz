@@ -57,6 +57,9 @@
           <li>Solutions show correct action and rationale.</li>
         </ul>
         <p><button id="begin" class="btn">Begin</button> <span class="muted" id="loadState"></span></p>
+        <label class="muted" for="pid" style="display:block;margin-top:.5rem">Participant ID</label>
+        <input id="pid" type="text" placeholder="e.g., User A"
+               style="padding:.5rem;border:1px solid #cbd5e1;border-radius:.5rem;width:16rem">
       </div>
     </div>
 
@@ -110,7 +113,8 @@
   const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzhWALkZL3vWhxfacbEnJNWQ7o4OoJ1ZaPtU-eTniXCBSaey4EG1u_tVbY3ZG8umepF/exec';
 
   // State
-  const S = { Q: [], FB: [], A: [], start: 0, tick: null, marks: [], elapsed: '0.0' };
+  const S = { Q: [], FB: [], A: [], start: 0, tick: null, marks: [], elapsed: '0.0', pid: null };
+  let TURN_COUNT = 0;
   const $ = sel => document.querySelector(sel);
   const show = id => { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); $(id).classList.add('active'); };
 
@@ -126,16 +130,28 @@
       if(!fr.ok) throw new Error('feedback HTTP '+fr.status);
       S.Q = await qr.json();
       S.FB = await fr.json();
-      $('#loadState').textContent = ``;
+      $('#loadState').textContent = '';
     } catch(e){
       $('#loadState').textContent = 'load failed';
       console.error(e);
     }
   })();
 
+  // Count user turns from the web messenger (ignore automatic welcome events)
+  window.addEventListener('df-request-sent', (event) => {
+    const rb = event?.detail?.data?.requestBody;
+    if (!rb || !rb.queryInput) return;
+    const ev = rb.queryInput.event?.event;
+    if (ev && ev.toUpperCase().includes('WELCOME')) return;
+    TURN_COUNT++;
+  });
+
   // Begin
   $('#begin').addEventListener('click', () => {
     if(!S.Q?.length){ alert('Questions not loaded.'); return; }
+    const qsPid = new URLSearchParams(location.search).get('pid');
+    const typed = ($('#pid')?.value || '').trim();
+    S.pid = typed || qsPid || 'anon';
     buildQuiz();
     startTimer();
     show('#quiz');
@@ -242,8 +258,8 @@
     const comment = ($('#fbText').value||'').trim();
     const fbAvg = fb.length? (fb.reduce((a,b)=>a+b,0)/fb.length).toFixed(2) : '';
 
-    // Row layout: variant tag, timestamp, marks[], feedback[], elapsed, score/total, avg, comment
-    const row=["chat_guideline_chatbot", stamp, ...S.marks, ...fb, S.elapsed, `${score}/${S.Q.length}`, fbAvg, comment];
+    // Row layout: variant tag, participant_id, timestamp, marks[], turns, feedback[], elapsed, score/total, avg, comment
+    const row=["chat_guideline_chatbot", S.pid, stamp, ...S.marks, TURN_COUNT, ...fb, S.elapsed, `${score}/${S.Q.length}`, fbAvg, comment];
 
     try{
       $('#saveState').textContent='saving…';
