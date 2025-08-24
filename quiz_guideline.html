@@ -49,6 +49,9 @@
           <li>Results show the correct action and a short rationale.</li>
         </ul>
         <p><button id="begin" class="btn">Begin</button> <span class="muted" id="loadState"></span></p>
+        <label class="muted" for="pid" style="display:block;margin-top:.5rem">Participant ID</label>
+        <input id="pid" type="text" placeholder="e.g., teamA-001"
+               style="padding:.5rem;border:1px solid #cbd5e1;border-radius:.5rem;width:16rem">
       </div>
     </div>
   </section>
@@ -80,7 +83,7 @@
   const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzhWALkZL3vWhxfacbEnJNWQ7o4OoJ1ZaPtU-eTniXCBSaey4EG1u_tVbY3ZG8umepF/exec';
 
   // State
-  const S = { Q: [], A: [], start: 0, tick: null };
+  const S = { Q: [], A: [], start: 0, tick: null, pid: null };
   const $ = sel => document.querySelector(sel);
   const show = id => { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); $(id).classList.add('active'); };
 
@@ -101,6 +104,9 @@
   // Begin
   $('#begin').addEventListener('click', () => {
     if(!S.Q?.length){ alert('Questions not loaded.'); return; }
+    const qsPid = new URLSearchParams(location.search).get('pid');
+    const typed = ($('#pid')?.value || '').trim();
+    S.pid = typed || qsPid || 'anon';
     buildQuiz();
     startTimer();
     show('#quiz');
@@ -143,7 +149,7 @@
     const now=new Date();
     const stamp=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
     const score=marks.reduce((a,b)=>a+b,0);
-    const row=["quiz_guideline", stamp, ...marks, elapsed, `${score}/${S.Q.length}`];
+    const row=["quiz_guideline", S.pid, stamp, ...marks, 0, elapsed, `${score}/${S.Q.length}`];
 
     try{
       $('#saveState').textContent='saving…';
