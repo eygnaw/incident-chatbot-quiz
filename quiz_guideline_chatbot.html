@@ -155,7 +155,7 @@ function finish(){
 
 /* ── init ── */
 async function initQuiz(){
-  [Q,FB]=await Promise.all([J('questions.json'),J('feedback.json')]);
+  [Q,FB]=await Promise.all([J('questions2.json'),J('feedback.json')]);
   buildQuiz();buildFB();show('quizPage');start();
   $('quizSubmit').onclick=grade;
   $('toFb').onclick=()=>show('fbPage');
