@@ -39,7 +39,8 @@
   <!-- Intro -->
   <section id="intro" class="page active">
     <h1>Incident Decision Quiz</h1>
-    <p class="muted">Guideline + Chatbot + Feedback. Clean one-page UI.</p>
+    <p> Enhanced quiz with a chatbot. Use the guideline and ask the bot when needed. We will compare your error rate and time to the baseline and include your feedback.</p>
+    <p> The chatbot has two modes: Flow or Playbook. Flow guides you with the intended order of the guideline while playbook can answer open questions about the guideline.</p>
 
     <div class="grid">
       <div class="card">
@@ -125,7 +126,7 @@
       if(!fr.ok) throw new Error('feedback HTTP '+fr.status);
       S.Q = await qr.json();
       S.FB = await fr.json();
-      $('#loadState').textContent = `loaded ${S.Q.length} questions & ${S.FB.length} feedback items`;
+      $('#loadState').textContent = ``;
     } catch(e){
       $('#loadState').textContent = 'load failed';
       console.error(e);
