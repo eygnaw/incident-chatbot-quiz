@@ -235,15 +235,21 @@
   function buildFB(){
     const f = $('#fbForm');
     f.innerHTML = '';
+    const L = {1:'Strongly Disagree',2:'Disagree',3:'Neutral',4:'Agree',5:'Strongly Agree'};
     S.FB.forEach((item,i)=>{
       const row = document.createElement('div');
-      row.innerHTML = `<p style="font-weight:600">${item.label}</p>` +
-        [1,2,3,4,5].map(v=>`<label style="margin-right:.5rem"><input type="radio" name="fb${i}" value="${v}">${v}</label>`).join('') +
+      row.innerHTML =
+        `<p style="font-weight:600">${item.label}</p>` +
+        [1,2,3,4,5].map(v =>
+          `<label style="margin-right:.75rem;display:inline-block">
+             <input type="radio" name="fb${i}" value="${v}"> ${v} — ${L[v]}
+           </label>`).join('') +
         '<hr>';
       f.appendChild(row);
     });
     f.onchange = () => { $('#fbSubmit').disabled = !S.FB.every((_,i)=>document.querySelector(`input[name='fb${i}']:checked`)); };
   }
+
 
   // Go to feedback
   $('#toFb').addEventListener('click', () => { buildFB(); show('#fb'); });
