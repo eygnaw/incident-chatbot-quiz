@@ -1,12 +1,18 @@
 [
-  { "label": "How clearly did the chatbot explain the reasoning behind each answer?" },
-  { "label": "How accurately did the chatbot interpret your input or question?" },
-  { "label": "How well did the chatbot follow the logic of the decision tree?" },
-  { "label": "How effectively did the chatbot help you identify the correct outcome?" },
-  { "label": "How consistent were the chatbot’s responses with the official guidelines?" },
-  { "label": "How easy was it to phrase your question in a way the chatbot understood?" },
-  { "label": "How well did the chatbot maintain a logical flow during the conversation?" },
-  { "label": "How helpful were the chatbot’s answers in addressing your specific case or concern?" },
-  { "label": "How informative were the chatbot’s responses in clarifying your understanding?" },
-  { "label": "How confident did you feel in your decision after using the chatbot?" }
+  { "label": "The chatbot’s personality was realistic and engaging" },
+  { "label": "The chatbot seemed too robotic" },
+  { "label": "The chatbot was welcoming during initial setup" },
+  { "label": "The chatbot seemed very unfriendly" },
+  { "label": "The chatbot explained its scope and purpose well" },
+  { "label": "The chatbot gave no indication as to its purpose" },
+  { "label": "The chatbot was easy to navigate" },
+  { "label": "It would be easy to get confused when using the chatbot" },
+  { "label": "The chatbot understood me well" },
+  { "label": "The chatbot failed to recognise a lot of my inputs" },
+  { "label": "Chatbot responses were useful, appropriate and informative" },
+  { "label": "Chatbot responses were irrelevant" },
+  { "label": "The chatbot coped well with any errors or mistakes" },
+  { "label": "The chatbot seemed unable to handle any errors" },
+  { "label": "The chatbot was very easy to use" },
+  { "label": "The chatbot was very complex" }
 ]
