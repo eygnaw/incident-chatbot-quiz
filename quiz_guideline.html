@@ -50,7 +50,7 @@
         </ul>
         <p><button id="begin" class="btn">Begin</button> <span class="muted" id="loadState"></span></p>
         <label class="muted" for="pid" style="display:block;margin-top:.5rem">Participant ID</label>
-        <input id="pid" type="text" placeholder="e.g., teamA-001"
+        <input id="pid" type="text" placeholder="e.g., User A"
                style="padding:.5rem;border:1px solid #cbd5e1;border-radius:.5rem;width:16rem">
       </div>
     </div>
@@ -94,7 +94,7 @@
       const r = await fetch('questions1.json', {cache:'no-cache'});
       if(!r.ok) throw new Error('HTTP '+r.status);
       S.Q = await r.json();
-      $('#loadState').textContent = `loaded ${S.Q.length} questions`;
+      $('#loadState').textContent = ``;
     } catch(e){
       $('#loadState').textContent = 'failed to load questions';
       console.error(e);
