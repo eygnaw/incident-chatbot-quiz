@@ -88,7 +88,7 @@
   (async function preload(){
     try {
       $('#loadState').textContent = 'loading questions…';
-      const r = await fetch('questions.json', {cache:'no-cache'});
+      const r = await fetch('questions1.json', {cache:'no-cache'});
       if(!r.ok) throw new Error('HTTP '+r.status);
       S.Q = await r.json();
       $('#loadState').textContent = `loaded ${S.Q.length} questions`;
