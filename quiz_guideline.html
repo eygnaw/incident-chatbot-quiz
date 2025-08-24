@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Incident Decision Quiz — Guideline Only</title>
+<style>
+  :root{--ink:#0f172a;--brand:#1e40af;--muted:#f1f5f9}
+  html,body{height:100%}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#f8fafc}
+  .container{max-width:840px;margin:0 auto;padding:2rem}
+  .page{display:none}
+  .page.active{display:block}
+  .btn{display:inline-block;padding:.65rem 1.1rem;border-radius:.5rem;border:0;background:var(--brand);color:#fff;font-weight:600;cursor:pointer}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .muted{color:#475569}
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:.75rem;box-shadow:0 1px 2px rgba(2,6,23,.04);padding:1rem}
+  .scroll{max-height:70vh;overflow:auto}
+  .q{margin:.75rem 0}
+  .q > p{margin:.25rem 0 .5rem}
+  hr{border:0;border-top:1px solid #e2e8f0;margin:1rem 0}
+  .pill{display:inline-block;font-size:.8rem;border:1px solid #cbd5e1;border-radius:999px;padding:.15rem .5rem;background:var(--muted)}
+  .badge{font-weight:700;display:inline-block;min-width:1.6rem;text-align:center}
+  .good{background:#e8f7ec;border:1px solid #b7ebc4}
+  .bad{background:#fdeaea;border:1px solid #fac5c5}
+  .grid{display:grid;gap:1rem}
+  @media (min-width: 900px){.grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- Intro -->
+  <section id="intro" class="page active">
+    <h1>Incident Decision Quiz</h1>
+    <p class="muted">Guideline-only version. No chatbot. No ratings form.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Guideline</h3>
+        <p>Use the Incident Decision Tree to reason about each scenario. Keep the flow in mind: Deliberate Harm → Incapacity → Foresight → Substitution.</p>
+        <p><a class="btn" href="incident-decision-tree-guideline.pdf" target="_blank" rel="noopener">Open PDF</a></p>
+        <p class="muted"><span class="pill">Tip</span> You can keep the PDF open in a separate tab while answering.</p>
+      </div>
+      <div class="card">
+        <h3>How it works</h3>
+        <ul>
+          <li>All questions load on one page.</li>
+          <li>The timer starts when you begin and stops on submit.</li>
+          <li>Results show the correct action and a short rationale.</li>
+        </ul>
+        <p><button id="begin" class="btn">Begin</button> <span class="muted" id="loadState"></span></p>
+      </div>
+    </div>
+
+    <figure style="margin-top:1rem" class="card">
+      <img src="idt_flow_small.png" alt="Incident Decision Tree flow-chart thumbnail" style="max-width:100%;display:block;margin:auto" />
+    </figure>
+  </section>
+
+  <!-- Quiz -->
+  <section id="quiz" class="page">
+    <p>Time: <span id="t">0.0</span>s</p>
+    <div id="box" class="card scroll" aria-live="polite"></div>
+    <p style="margin-top:1rem">
+      <button id="submit" class="btn" disabled>Submit answers</button>
+      <button id="cancel" class="btn" style="background:#475569" onclick="location.reload()">Cancel</button>
+    </p>
+  </section>
+
+  <!-- Results -->
+  <section id="results" class="page">
+    <h2>Solutions</h2>
+    <p id="score" class="muted"></p>
+    <div id="sol" class="card scroll"></div>
+    <p style="margin-top:1rem">
+      <button class="btn" onclick="location.reload()">Restart</button>
+    </p>
+  </section>
+</div>
+
+<script>
+  // State
+  const S = { Q: [], A: [], start: 0, tick: null };
+  const $ = sel => document.querySelector(sel);
+  const show = id => { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); $(id).classList.add('active'); };
+
+  // Load questions early
+  (async function preload(){
+    try {
+      $('#loadState').textContent = 'loading questions…';
+      const r = await fetch('questions.json', {cache:'no-cache'});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      S.Q = await r.json();
+      $('#loadState').textContent = `loaded ${S.Q.length} questions`;
+    } catch(e){
+      $('#loadState').textContent = 'failed to load questions';
+      console.error(e);
+    }
+  })();
+
+  // Begin
+  $('#begin').addEventListener('click', () => {
+    if(!S.Q?.length){ alert('Questions not loaded.'); return; }
+    buildQuiz();
+    startTimer();
+    show('#quiz');
+  });
+
+  function startTimer(){
+    S.start = Date.now();
+    S.tick = setInterval(()=>{ $('#t').textContent = ((Date.now()-S.start)/1000).toFixed(1); }, 100);
+  }
+  function stopTimer(){ clearInterval(S.tick); }
+
+  function buildQuiz(){
+    const box = $('#box');
+    box.innerHTML = '';
+    S.A = Array(S.Q.length).fill(null);
+
+    S.Q.forEach((q, qi) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'q';
+      wrap.innerHTML = `<p><strong>Q${qi+1}.</strong> ${q.text}</p>` +
+        q.options.map((opt, oi) => {
+          const id = `q${qi}_${oi}`;
+          return `<label for="${id}"><input type="radio" id="${id}" name="q${qi}" value="${oi}"> <span class="badge">${String.fromCharCode(65+oi)}</span> — ${opt}</label><br>`;
+        }).join('');
+      box.appendChild(wrap);
+    });
+
+    box.addEventListener('change', () => {
+      S.A = S.Q.map((_, i) => {
+        const el = document.querySelector(`input[name="q${i}"]:checked`);
+        return el ? +el.value : null;
+      });
+      $('#submit').disabled = S.A.some(v => v === null);
+    }, { capture: true });
+  }
+
+  // Grade
+  $('#submit').addEventListener('click', () => {
+    stopTimer();
+    const elapsed = $('#t').textContent;
+    const marks = S.Q.map((q, i) => q.correctIndex === S.A[i] ? 1 : 0);
+    const score = marks.reduce((a,b)=>a+b,0);
+
+    $('#score').textContent = `You answered ${score} of ${S.Q.length} correctly (time ${elapsed}s).`;
+
+    // Build solutions
+    const sol = $('#sol');
+    sol.innerHTML = '';
+
+    S.Q.forEach((q, i) => {
+      const correct = q.correctIndex;
+      const user = S.A[i];
+
+      const sec = document.createElement('section');
+      sec.style.marginBottom = '1rem';
+
+      const head = document.createElement('div');
+      head.innerHTML = `<p><strong>Q${i+1}.</strong> ${q.text}</p>`;
+      sec.appendChild(head);
+
+      const you = document.createElement('p');
+      you.innerHTML = `<span class="pill ${user===correct?'good':'bad'}">Your choice: ${String.fromCharCode(65+user)}</span>`;
+      sec.appendChild(you);
+
+      const ans = document.createElement('p');
+      ans.innerHTML = `<strong>Correct:</strong> ${String.fromCharCode(65+correct)} — ${q.options[correct]}`;
+      sec.appendChild(ans);
+
+      if(q.note){
+        const note = document.createElement('p');
+        note.innerHTML = `<em>${q.note}</em>`;
+        sec.appendChild(note);
+      }
+
+      sol.appendChild(sec);
+      const hr = document.createElement('hr');
+      sol.appendChild(hr);
+    });
+
+    show('#results');
+  });
+</script>
+</body>
+</html>
