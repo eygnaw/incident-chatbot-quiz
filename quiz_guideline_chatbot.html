@@ -10,56 +10,93 @@
 <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
 
 <style>
-  body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0 380px 0 0;background:#f9fafb}
-  .container{max-width:800px;margin:0 auto;padding:2rem}
-  .page{display:none}.page.active{display:block}
-  .btn{padding:.6rem 1.4rem;background:#1e40af;color:#fff;border:none;border-radius:6px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  :root{--ink:#0f172a;--brand:#1e40af;--muted:#f1f5f9}
+  html,body{height:100%}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#f8fafc}
+  .container{max-width:840px;margin:0 auto;padding:2rem}
+  .page{display:none}
+  .page.active{display:block}
+  .btn{display:inline-block;padding:.65rem 1.1rem;border-radius:.5rem;border:0;background:var(--brand);color:#fff;font-weight:600;cursor:pointer}
   .btn:disabled{opacity:.6;cursor:not-allowed}
-  .scroll-area{max-height:70vh;overflow-y:auto;border:1px solid #ddd;background:#fff;padding:1rem;margin-bottom:1rem;border-radius:6px}
-  pre{white-space:pre-wrap}
+  .muted{color:#475569}
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:.75rem;box-shadow:0 1px 2px rgba(2,6,23,.04);padding:1rem}
+  .scroll{max-height:70vh;overflow:auto}
+  .q{margin:.75rem 0}
+  .q > p{margin:.25rem 0 .5rem}
+  hr{border:0;border-top:1px solid #e2e8f0;margin:1rem 0}
+  .pill{display:inline-block;font-size:.8rem;border:1px solid #cbd5e1;border-radius:999px;padding:.15rem .5rem;background:var(--muted)}
+  .badge{font-weight:700;display:inline-block;min-width:1.6rem;text-align:center}
+  .good{background:#e8f7ec;border:1px solid #b7ebc4}
+  .bad{background:#fdeaea;border:1px solid #fac5c5}
+  .grid{display:grid;gap:1rem}
+  @media (min-width: 900px){.grid{grid-template-columns:1fr 1fr}}
   df-messenger{position:fixed;bottom:16px;right:16px;z-index:999}
-  @media(max-width:900px){body{padding:0}df-messenger{left:0;right:0;width:100%;height:55%}}
+  @media(max-width:900px){df-messenger{left:0;right:0;width:100%;height:55%}}
 </style>
 </head>
 <body>
+<div class="container">
+  <!-- Intro -->
+  <section id="intro" class="page active">
+    <h1>Incident Decision Quiz</h1>
+    <p class="muted">Guideline + Chatbot + Feedback. Clean one-page UI.</p>
 
-<!-- Intro -->
-<div id="introPage" class="page active container"></div>
+    <div class="grid">
+      <div class="card">
+        <h3>Guideline</h3>
+        <p>Use the Incident Decision Tree to reason about each scenario. Flow: Deliberate Harm → Incapacity → Foresight → Substitution.</p>
+        <p><a class="btn" href="incident-decision-tree-guideline.pdf" target="_blank" rel="noopener">Open PDF</a></p>
+        <p class="muted"><span class="pill">Tip</span> Keep the PDF open while answering.</p>
+      </div>
+      <div class="card">
+        <h3>How it works</h3>
+        <ul>
+          <li>All questions on one page.</li>
+          <li>Timer starts on Begin. Stops on submit.</li>
+          <li>Solutions show correct action and rationale.</li>
+        </ul>
+        <p><button id="begin" class="btn">Begin</button> <span class="muted" id="loadState"></span></p>
+      </div>
+    </div>
 
-<!-- Quiz -->
-<div id="quizPage" class="page container">
-  <div>Time: <span id="timer">0.0</span>s</div>
-  <div id="quizBox" class="scroll-area"></div>
-  <button id="quizSubmit" class="btn" disabled>Submit answers</button>
+    <figure style="margin-top:1rem" class="card">
+      <img src="idt_flow_small.png" alt="Incident Decision Tree flow chart thumbnail" style="max-width:100%;display:block;margin:auto" />
+    </figure>
+  </section>
+
+  <!-- Quiz -->
+  <section id="quiz" class="page">
+    <p>Time: <span id="t">0.0</span>s</p>
+    <div id="box" class="card scroll" aria-live="polite"></div>
+    <p style="margin-top:1rem">
+      <button id="submit" class="btn" disabled>Submit answers</button>
+      <button id="cancel" class="btn" style="background:#475569" onclick="location.reload()">Cancel</button>
+    </p>
+  </section>
+
+  <!-- Results -->
+  <section id="results" class="page">
+    <h2>Solutions</h2>
+    <p id="score" class="muted"></p>
+    <div id="sol" class="card scroll"></div>
+    <p style="margin-top:1rem">
+      <button id="toFb" class="btn">Give feedback</button>
+    </p>
+  </section>
+
+  <!-- Feedback -->
+  <section id="fb" class="page">
+    <h2>Your feedback</h2>
+    <form id="fbForm" class="card scroll" style="max-height:50vh"></form>
+    <label style="font-weight:600">Additional comments (optional)</label><br>
+    <textarea id="fbText" rows="3" style="width:100%;border:1px solid #cbd5e1;border-radius:.5rem;margin-bottom:1rem"></textarea>
+    <p id="saveState" class="muted" style="margin:.5rem 0 1rem"></p>
+    <p><button id="fbSubmit" class="btn" disabled>Submit feedback</button>
+       <button class="btn" style="background:#475569" onclick="location.reload()">Finish</button></p>
+  </section>
 </div>
 
-<!-- Results -->
-<div id="resultPage" class="page container">
-  <h2>Solutions</h2>
-  <p id="scoreLine"></p>
-  <div id="solutions" class="scroll-area"></div>
-  <button id="toFb" class="btn">Give feedback</button>
-</div>
-
-<!-- Feedback -->
-<div id="fbPage" class="page container">
-  <h2>Your feedback</h2>
-  <form id="fbForm" class="scroll-area" style="max-height:50vh"></form>
-  <label style="font-weight:600">Additional comments (optional)</label><br>
-  <textarea id="fbText" rows="3" style="width:100%;border:1px solid #ccc;border-radius:4px;margin-bottom:1rem"></textarea>
-  <button id="fbSubmit" class="btn" disabled>Submit feedback</button>
-</div>
-
-<!-- Thank‑you / summary -->
-<div id="thanksPage" class="page container">
-  <h2>Thank you</h2>
-  <p id="humanSummary"></p>
-  <button id="toggleVector" class="btn" style="margin-bottom:1rem">Show raw vector</button>
-  <pre id="vectorBox" style="display:none;background:#f4f4f4;padding:1rem;border-radius:6px"></pre>
-  <pre id="summaryRow" style="display:none"></pre>
-</div>
-
-<!-- Chatbot -->
+<!-- Chatbot widget -->
 <df-messenger location="europe-west2"
               project-id="incident-decision-tree-as-sppe"
               agent-id="dfdb170b-7667-470a-81c3-3dfaa2488c5b"
@@ -68,102 +105,156 @@
 </df-messenger>
 
 <script>
-/* ─── CONFIG ─── */
-const VER='2025-08-24'; // bump when JSON changes to bust cache
-const SHEET_ENDPOINT='https://script.google.com/macros/s/AKfycbzhWALkZL3vWhxfacbEnJNWQ7o4OoJ1ZaPtU-eTniXCBSaey4EG1u_tVbY3ZG8umepF/exec';
+  // Config
+  const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzhWALkZL3vWhxfacbEnJNWQ7o4OoJ1ZaPtU-eTniXCBSaey4EG1u_tVbY3ZG8umepF/exec';
 
-/* ─── helpers ─── */
-const $=id=>document.getElementById(id);
-const J=p=>fetch(`${p}?v=${VER}`,{cache:'no-cache'}).then(r=>r.json());
-const H=p=>fetch(`${p}?v=${VER}`,{cache:'no-cache'}).then(r=>r.text());
-const show=id=>{document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');};
+  // State
+  const S = { Q: [], FB: [], A: [], start: 0, tick: null, marks: [], elapsed: '0.0' };
+  const $ = sel => document.querySelector(sel);
+  const show = id => { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); $(id).classList.add('active'); };
 
-/* ─── state ─── */
-let Q=[],FB=[];
-const S={ans:[],correct:[],fb:[],comment:'',start:0};
+  // Load data early
+  (async function preload(){
+    try {
+      $('#loadState').textContent = 'loading…';
+      const [qr, fr] = await Promise.all([
+        fetch('questions2.json', {cache:'no-cache'}),
+        fetch('feedback.json', {cache:'no-cache'})
+      ]);
+      if(!qr.ok) throw new Error('questions HTTP '+qr.status);
+      if(!fr.ok) throw new Error('feedback HTTP '+fr.status);
+      S.Q = await qr.json();
+      S.FB = await fr.json();
+      $('#loadState').textContent = `loaded ${S.Q.length} questions & ${S.FB.length} feedback items`;
+    } catch(e){
+      $('#loadState').textContent = 'load failed';
+      console.error(e);
+    }
+  })();
 
-/* ── timer ── */
-let tick;const t=$('timer');
-const start=()=>{S.start=Date.now();tick=setInterval(()=>t.textContent=((Date.now()-S.start)/1000).toFixed(1),100)};
-const stop =()=>clearInterval(tick);
-
-/* ── build quiz ── */
-function buildQuiz(){
-  const box=$('quizBox');box.innerHTML='';
-  Q.forEach((q,qi)=>{
-    box.insertAdjacentHTML('beforeend',
-      `<p class="question">${q.text}</p>`+
-      q.options.map((o,oi)=>`<label><input type="radio" name="q${qi}" value="${oi}"> ${String.fromCharCode(65+oi)} — ${o}</label><br>`).join('')+
-      '<hr>');
+  // Begin
+  $('#begin').addEventListener('click', () => {
+    if(!S.Q?.length){ alert('Questions not loaded.'); return; }
+    buildQuiz();
+    startTimer();
+    show('#quiz');
   });
-  box.querySelectorAll('input').forEach(i=>i.addEventListener('change',()=>{$('quizSubmit').disabled=!Q.every((_,i)=>document.querySelector(`input[name='q${i}']:checked`));}));
-}
 
-/* ── grade ── */
-function grade(){
-  stop();
-  S.ans=Q.map((_,i)=>+document.querySelector(`input[name='q${i}']:checked`).value);
-  S.correct=Q.map((q,i)=>q.correctIndex===S.ans[i]?1:0);
-  const score=S.correct.reduce((a,b)=>a+b,0);
-  $('scoreLine').textContent=`You answered ${score} of ${Q.length} correctly (time ${t.textContent}s).`;
-  const sol=$('solutions');sol.innerHTML='';
-  Q.forEach((q,i)=>sol.insertAdjacentHTML('beforeend',
-    `<p>${q.text}</p><p><strong>Correct:</strong> ${String.fromCharCode(65+q.correctIndex)} – ${q.options[q.correctIndex]}</p>`+
-    (q.note?`<p><em>${q.note}</em></p>`:'')+'<hr>'));
-  show('resultPage');
-}
+  function startTimer(){
+    S.start = Date.now();
+    S.tick = setInterval(()=>{ $('#t').textContent = ( (S.elapsed = ((Date.now()-S.start)/1000).toFixed(1)) ); }, 100);
+  }
+  function stopTimer(){ clearInterval(S.tick); }
 
-/* ── feedback page build ── */
-function buildFB(){
-  const f=$('fbForm');f.innerHTML='';
-  FB.forEach((item,i)=>f.insertAdjacentHTML('beforeend',
-    `<p style="font-weight:600">${item.label}</p>`+
-    [1,2,3,4,5].map(v=>`<label style="margin-right:.5rem"><input type="radio" name="fb${i}" value="${v}">${v}</label>`).join('')+
-    '<hr>'));
-  f.onchange=()=>$('fbSubmit').disabled=!FB.every((_,i)=>document.querySelector(`input[name='fb${i}']:checked`));
-}
-const grabFB=()=>{S.fb=FB.map((_,i)=>+document.querySelector(`input[name='fb${i}']:checked`).value);S.comment=$('fbText').value.trim();};
+  function buildQuiz(){
+    const box = $('#box');
+    box.innerHTML = '';
+    S.A = Array(S.Q.length).fill(null);
 
-/* ── finish & save ── */
-function finish(){
-  grabFB();
-  const now=new Date(),pad=n=>n.toString().padStart(2,'0');
-  const stamp=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  const score=S.correct.reduce((a,b)=>a+b,0);
-  const fbAvg=(S.fb.reduce((a,b)=>a+b,0)/S.fb.length).toFixed(2);
+    S.Q.forEach((q, qi) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'q';
+      wrap.innerHTML = `<p><strong>Q${qi+1}.</strong> ${q.text}</p>` +
+        q.options.map((opt, oi) => {
+          const id = `q${qi}_${oi}`;
+          return `<label for="${id}"><input type="radio" id="${id}" name="q${qi}" value="${oi}"> <span class=\"badge\">${String.fromCharCode(65+oi)}</span> — ${opt}</label><br>`;
+        }).join('');
+      box.appendChild(wrap);
+    });
 
-  // Tag first column so metrics source is explicit
-  const row=["chat_guideline_chatbot", stamp, ...S.correct, ...S.fb, t.textContent, `${score}/${Q.length}`, fbAvg, S.comment];
+    box.addEventListener('change', () => {
+      S.A = S.Q.map((_, i) => {
+        const el = document.querySelector(`input[name="q${i}"]:checked`);
+        return el ? +el.value : null;
+      });
+      $('#submit').disabled = S.A.some(v => v === null);
+    }, { capture: true });
+  }
 
-  // user‑readable summary
-  $('humanSummary').innerHTML=
-    `<strong>Variant:</strong> chat_guideline_chatbot<br>`+
-    `<strong>Date:</strong> ${stamp}<br>`+
-    `<strong>Score:</strong> ${score}/${Q.length}<br>`+
-    `<strong>Time:</strong> ${t.textContent}s<br>`+
-    `<strong>Feedback average:</strong> ${fbAvg}`+
-    (S.comment?`<br><strong>Your comment:</strong> ${S.comment}`:'');
+  // Results view only. Saving happens after feedback.
+  $('#submit').addEventListener('click', () => {
+    stopTimer();
+    const marks = S.Q.map((q, i) => q.correctIndex === S.A[i] ? 1 : 0);
+    S.marks = marks;
+    const score = marks.reduce((a,b)=>a+b,0);
 
-  // raw row exactly as stored
-  $('vectorBox').textContent = JSON.stringify(row, null, 2);
-  $('summaryRow').textContent=JSON.stringify(row,null,2);
-  $('toggleVector').onclick=()=>{const box=$('vectorBox');const btn=$('toggleVector');const open=box.style.display==='block';box.style.display=open?'none':'block';btn.textContent=open?'Show raw vector':'Hide raw vector';};
+    $('#score').textContent = `You answered ${score} of ${S.Q.length} correctly (time ${S.elapsed}s).`;
 
-  fetch(SHEET_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(row)});
-  show('thanksPage');
-}
+    const sol = $('#sol');
+    sol.innerHTML = '';
+    S.Q.forEach((q, i) => {
+      const correct = q.correctIndex;
+      const user = S.A[i];
 
-/* ── init ── */
-async function initQuiz(){
-  [Q,FB]=await Promise.all([J('questions2.json'),J('feedback.json')]);
-  buildQuiz();buildFB();show('quizPage');start();
-  $('quizSubmit').onclick=grade;
-  $('toFb').onclick=()=>show('fbPage');
-  $('fbSubmit').onclick=finish;
-}
+      const sec = document.createElement('section');
+      sec.style.marginBottom = '1rem';
 
-/* ── bootstrap intro ── */
-H('intro.html').then(txt=>{ $('introPage').innerHTML=txt+"<button class='btn' id='begin'>Begin</button>"; $('begin').onclick=initQuiz; });
+      const head = document.createElement('div');
+      head.innerHTML = `<p><strong>Q${i+1}.</strong> ${q.text}</p>`;
+      sec.appendChild(head);
+
+      const you = document.createElement('p');
+      you.innerHTML = `<span class="pill ${user===correct?'good':'bad'}">Your choice: ${String.fromCharCode(65+user)}</span>`;
+      sec.appendChild(you);
+
+      const ans = document.createElement('p');
+      ans.innerHTML = `<strong>Correct:</strong> ${String.fromCharCode(65+correct)} — ${q.options[correct]}`;
+      sec.appendChild(ans);
+
+      if(q.note){
+        const note = document.createElement('p');
+        note.innerHTML = `<em>${q.note}</em>`;
+        sec.appendChild(note);
+      }
+
+      sol.appendChild(sec);
+      sol.appendChild(document.createElement('hr'));
+    });
+
+    show('#results');
+  });
+
+  // Feedback page build
+  function buildFB(){
+    const f = $('#fbForm');
+    f.innerHTML = '';
+    S.FB.forEach((item,i)=>{
+      const row = document.createElement('div');
+      row.innerHTML = `<p style="font-weight:600">${item.label}</p>` +
+        [1,2,3,4,5].map(v=>`<label style="margin-right:.5rem"><input type="radio" name="fb${i}" value="${v}">${v}</label>`).join('') +
+        '<hr>';
+      f.appendChild(row);
+    });
+    f.onchange = () => { $('#fbSubmit').disabled = !S.FB.every((_,i)=>document.querySelector(`input[name='fb${i}']:checked`)); };
+  }
+
+  // Go to feedback
+  $('#toFb').addEventListener('click', () => { buildFB(); show('#fb'); });
+
+  // Save to Google Sheets after feedback
+  async function saveRowToSheet(){
+    const pad=n=>n.toString().padStart(2,'0');
+    const now=new Date();
+    const stamp=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const score=S.marks.reduce((a,b)=>a+b,0);
+    const fb = S.FB.map((_,i)=> +document.querySelector(`input[name='fb${i}']:checked`).value );
+    const comment = ($('#fbText').value||'').trim();
+    const fbAvg = fb.length? (fb.reduce((a,b)=>a+b,0)/fb.length).toFixed(2) : '';
+
+    // Row layout: variant tag, timestamp, marks[], feedback[], elapsed, score/total, avg, comment
+    const row=["chat_guideline_chatbot", stamp, ...S.marks, ...fb, S.elapsed, `${score}/${S.Q.length}`, fbAvg, comment];
+
+    try{
+      $('#saveState').textContent='saving…';
+      await fetch(SHEET_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(row)});
+      $('#saveState').textContent='saved';
+    }catch(e){
+      console.error(e);
+      $('#saveState').textContent='save failed';
+    }
+  }
+
+  $('#fbSubmit').addEventListener('click', saveRowToSheet);
 </script>
 </body>
 </html>
