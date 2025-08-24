@@ -68,6 +68,7 @@
     <h2>Solutions</h2>
     <p id="score" class="muted"></p>
     <div id="sol" class="card scroll"></div>
+    <p id="saveState" class="muted" style="margin-top:1rem"></p>
     <p style="margin-top:1rem">
       <button class="btn" onclick="location.reload()">Restart</button>
     </p>
@@ -75,6 +76,9 @@
 </div>
 
 <script>
+  // Config for Google Sheets endpoint (same pattern as example)
+  const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzhWALkZL3vWhxfacbEnJNWQ7o4OoJ1ZaPtU-eTniXCBSaey4EG1u_tVbY3ZG8umepF/exec';
+
   // State
   const S = { Q: [], A: [], start: 0, tick: null };
   const $ = sel => document.querySelector(sel);
@@ -133,8 +137,26 @@
     }, { capture: true });
   }
 
+  // Save to Google Sheets
+  async function saveRowToSheet(marks, elapsed){
+    const pad=n=>n.toString().padStart(2,'0');
+    const now=new Date();
+    const stamp=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const score=marks.reduce((a,b)=>a+b,0);
+    const row=["quiz_guideline", stamp, ...marks, elapsed, `${score}/${S.Q.length}`];
+
+    try{
+      $('#saveState').textContent='saving…';
+      await fetch(SHEET_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(row)});
+      $('#saveState').textContent='saved to Google Sheets';
+    }catch(e){
+      console.error(e);
+      $('#saveState').textContent='save failed';
+    }
+  }
+
   // Grade
-  $('#submit').addEventListener('click', () => {
+  $('#submit').addEventListener('click', async () => {
     stopTimer();
     const elapsed = $('#t').textContent;
     const marks = S.Q.map((q, i) => q.correctIndex === S.A[i] ? 1 : 0);
@@ -175,6 +197,9 @@
       const hr = document.createElement('hr');
       sol.appendChild(hr);
     });
+
+    // Save metrics
+    await saveRowToSheet(marks, elapsed);
 
     show('#results');
   });
