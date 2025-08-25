@@ -2,10 +2,10 @@
   {
     "text": "A ward nurse, angry that a patient repeatedly refused physiotherapy, removed the patient-controlled analgesia handset and told the patient they would 'learn to cope without it.' The patient was left in uncontrolled pain for hours.",
     "options": [
-      "Verbal warning and communication skills training.",
-      "Temporary redeployment and mediation with the patient.",
-      "Immediate suspension, safeguarding referral, and report to the NMC; consider police referral.",
-      "Reflective practice essay and return to supervised duties."
+      "Issue a verbal warning with mandatory communication skills training and a scheduled reflective review.",
+      "Arrange temporary redeployment with documented mediation with the patient and no formal escalation.",
+      "Immediate suspension, safeguarding referral, report to the NMC and consider police referral.",
+      "Require a reflective practice essay and a short period of supervised duties before normal practice."
     ],
     "correctIndex": 2,
     "note": "Intentional withholding of prescribed analgesia to cause suffering. This meets the deliberate harm threshold; urgent protective action and regulatory escalation are indicated."
@@ -13,10 +13,10 @@
   {
     "text": "A healthcare assistant took a humiliating photo of a sedated patient and shared it in a group chat with derogatory comments. The patient later learned of the photo and was distressed.",
     "options": [
-      "Issue a written apology and require social-media training.",
-      "Dismiss for abuse and humiliation, inform safeguarding, and notify the employer’s regulator/DBS route.",
-      "One-week suspension without investigation to make a point.",
-      "Redeploy for three months and close the case."
+      "Issue a written apology, require structured social-media and confidentiality training, and place a note on file.",
+      "Dismiss for abuse and humiliation, notify the staff’s management and issue a public apology.",
+      "Impose a one-week suspension without a full investigation as a deterrent measure only.",
+      "Redeploy for three months with informal coaching and then close the case without further action."
     ],
     "correctIndex": 1,
     "note": "Deliberate humiliation of a vulnerable patient. Gross misconduct with safeguarding and regulatory implications."
@@ -24,10 +24,10 @@
   {
     "text": "An on-call doctor, angered by a relative’s complaint, deliberately delayed prescribing antiemetics for the relative’s family member, stating privately that 'they can wait.' The patient vomited repeatedly and aspirated, requiring critical care.",
     "options": [
-      "Initiate dismissal proceedings and refer to the GMC; consider police if appropriate.",
-      "Issue a formal warning and require customer-care training.",
-      "Arrange mediation and return to normal duties.",
-      "Occupational health referral only."
+      "Initiate dismissal proceedings and refer to the authorities.",
+      "Issue a formal warning, mandate customer-care and professionalism training, and monitor for recurrence.",
+      "Arrange mediation with the family and return to normal duties without disciplinary record.",
+      "Refer to occupational health only and take no further conduct action."
     ],
     "correctIndex": 0,
     "note": "Malicious withholding of treatment with intent to harm. Immediate disciplinary and regulatory pathways are required."
@@ -35,10 +35,10 @@
   {
     "text": "A night registrar made multiple prescribing slips. Occupational health later confirmed severe undiagnosed obstructive sleep apnoea causing microsleeps. This was previously unknown to the registrar and team.",
     "options": [
-      "Dismiss for incompetence due to repeated errors.",
+      "Dismiss for incompetence based on repeated errors despite the subsequent health explanation.",
       "Refer to occupational health, place temporary practice restrictions, and monitor treatment response.",
-      "No action as the condition explains everything.",
-      "Report to police for endangering patients."
+      "Take no action, assuming the medical condition fully explains the errors and requires no follow-up.",
+      "Report the matter to police for potential endangerment of patients despite lack of intent."
     ],
     "correctIndex": 1,
     "note": "Previously unknown medical condition plausibly contributed. Prioritise health management and reasonable adjustments over punishment."
@@ -46,10 +46,10 @@
   {
     "text": "An insulin-dependent surgeon felt early hypoglycaemia but continued with an elective list without informing colleagues. Intra-op judgement errors occurred. The surgeon had been advised to stop and treat if symptoms arose.",
     "options": [
-      "Suspend from clinical duties, refer to occupational health and the GMC, and assess fitness to practice.",
-      "Provide a verbal reminder only.",
-      "No action if the patient came to no lasting harm.",
-      "Immediate dismissal without investigation."
+      "Suspend from clinical duties and assess fitness to practice.",
+      "Provide only a verbal reminder about the agreed safety plan and no further steps.",
+      "Take no action provided no lasting harm occurred and the list finished uneventfully.",
+      "Dismiss immediately without any investigation or health assessment."
     ],
     "correctIndex": 0,
     "note": "Known medical condition with explicit safety plan ignored. This is an unacceptable risk; restriction and regulatory involvement are warranted."
@@ -57,10 +57,10 @@
   {
     "text": "A paramedic attended duty after using cocaine recreationally the previous night and showed impaired judgement on scene. This is the first recorded incident; the paramedic admits use.",
     "options": [
-      "Suspend immediately, refer to occupational health and the HCPC, and consider police referral per local policy.",
-      "Allow practice with weekly supervision only.",
-      "Issue a written apology to the patient and close the case.",
-      "Grant sick leave with no further steps."
+      "Suspend immediately.",
+      "Allow continued practice with weekly supervision meetings but no formal restriction.",
+      "Issue a written apology to the patient, file a note, and close the case.",
+      "Grant sick leave and take no further steps, monitoring or referrals."
     ],
     "correctIndex": 0,
     "note": "Acute substance misuse with patient-safety impact. Urgent protective measures and regulatory notification are required."
@@ -68,10 +68,10 @@
   {
     "text": "A nurse administered insulin without a second independent check despite a clear, workable, routinely used double-check protocol. The dose was tenfold and the patient required ICU.",
     "options": [
-      "Verbal reminder only because workload was high.",
-      "Occupational health referral only.",
-      "No action; errors happen.",
-      "Suspend and refer to the NMC pending investigation for unacceptable protocol violation."
+      "Give a verbal reminder citing workload pressure and make no formal record.",
+      "Refer to occupational health only without any investigatory or competency action.",
+      "Take no action on the basis that errors occur in busy settings.",
+      "Suspend and refer to pending investigation for unacceptable protocol violation."
     ],
     "correctIndex": 3,
     "note": "Protocol existed, was accessible, and in routine use. The nurse departed from it and took an unacceptable risk."
@@ -79,10 +79,10 @@
   {
     "text": "During a busy take, a junior doctor skipped the allergy check documented in an available admission protocol. An antibiotic on the red-banner list was given and caused anaphylaxis, from which the patient recovered.",
     "options": [
-      "Offer resilience training and no record kept.",
-      "No action because the patient recovered.",
-      "Issue a formal performance plan with restriction from prescribing pending training; notify GMC if pattern or severity warrants.",
-      "Immediate dismissal without investigation."
+      "Offer resilience training with no formal record or practice restriction.",
+      "Take no action since the patient recovered and the event was brief.",
+      "Issue a formal performance plan with restriction from prescribing pending training.",
+      "Dismiss immediately without an investigation or remediation plan."
     ],
     "correctIndex": 2,
     "note": "Clear departure from a known, workable protocol with high risk. Proportionate restriction and formal management are appropriate."
@@ -90,10 +90,10 @@
   {
     "text": "A theatre lead insisted on skipping the WHO 'time-out' to save time. No equipment failure or ambiguity existed. Wrong implant selection was narrowly averted by a scrub nurse.",
     "options": [
-      "Verbal nudge to follow the checklist next time.",
-      "Team training only with no action against the lead.",
+      "Give a simple verbal nudge to use the checklist in future and leave it at that.",
+      "Deliver team training only and take no individual action against the lead.",
       "Suspend pending investigation, initiate disciplinary action, and report to the relevant regulator.",
-      "Rotate the lead to another list without documentation."
+      "Quietly rotate the lead to another list without documentation or follow-up."
     ],
     "correctIndex": 2,
     "note": "Knowingly ignoring a core safety checklist constitutes unacceptable risk. Suspension and formal action are justified."
@@ -101,10 +101,10 @@
   {
     "text": "In a remote clinic with no paediatric airway kit, a GP used an improvised airway maneuver to maintain a child’s airway while waiting for retrieval. The local guideline covered adult equipment only.",
     "options": [
-      "Disciplinary action for not following a non-existent paediatric protocol.",
+      "Start disciplinary action for not following a non-existent paediatric protocol despite the emergency.",
       "No individual sanction; document learning, update protocols, and arrange targeted training.",
-      "Report to GMC for scope-of-practice breach.",
-      "Mandatory leave for two weeks without investigation."
+      "Report to the GMC for an alleged scope-of-practice breach despite lack of clear guidance.",
+      "Impose two weeks of mandatory leave without any investigation or debrief."
     ],
     "correctIndex": 1,
     "note": "Protocols were inadequate for the context. A reasonable peer may have acted similarly. Address system gaps and provide support."
@@ -113,9 +113,9 @@
     "text": "After a major EHR update, the allergy banner displayed in a collapsed panel. Several clinicians missed it in the first 48 hours. A pharmacist caught a near-miss; one junior had already prescribed a contraindicated drug.",
     "options": [
       "Treat as a system design and rollout failure; issue an urgent safety notice, add interim checks, and train staff.",
-      "Suspend the junior prescriber.",
-      "Do nothing because the pharmacist caught it.",
-      "Write final warnings for all staff who missed the banner."
+      "Suspend the junior prescriber involved despite the recent system change.",
+      "Do nothing since the pharmacist caught the issue and no harm occurred.",
+      "Issue final written warnings to all staff who missed the banner during rollout."
     ],
     "correctIndex": 0,
     "note": "Protocol visibility was impaired and not in routine use post-change. A peer could reasonably miss it; fix the system and brief teams."
@@ -123,10 +123,10 @@
   {
     "text": "A community midwife chose home monitoring over hospital admission for borderline pre-eclampsia in line with an ambiguous local pathway that lacks clear thresholds. Senior review later disagreed.",
     "options": [
-      "Immediate disciplinary action for unsafe decision-making.",
-      "No individual sanction; clarify the pathway, deliver update training, and set a senior-review trigger until fixed.",
-      "Refer to the NMC automatically.",
-      "Ignore because the baby was delivered safely."
+      "Take immediate disciplinary action for unsafe decision-making despite pathway ambiguity.",
+      "No individual punishment, update training, and set a senior-review trigger until fixed.",
+      "Refer to the NMC automatically without local review or learning.",
+      "Ignore the case entirely because the baby was delivered safely and there was no harm."
     ],
     "correctIndex": 1,
     "note": "Where guidance is ambiguous, the Substitution Test often indicates peers might act similarly. Prioritise pathway clarity and support."
@@ -134,10 +134,10 @@
   {
     "text": "Two wards used different versions of the sepsis protocol because the intranet link pointed to an old PDF. A nurse followed the outdated bundle and escalation was delayed.",
     "options": [
-      "Final written warning for the nurse.",
-      "Treat as system failure: fix document control, standardise links, brief all staff, and provide supportive refresher training.",
-      "Suspend the ward sister for poor oversight.",
-      "Report the nurse to the NMC for protocol breach."
+      "Give a final written warning to the nurse despite the outdated link.",
+      "Treat as system failure and provide supportive training to the staff involved.",
+      "Suspend the ward sister for poor oversight without addressing document control.",
+      "Report the nurse to the NMC for a protocol breach despite the intranet error."
     ],
     "correctIndex": 1,
     "note": "Version control failure. Focus on system correction, communication, and non-punitive education."
@@ -145,10 +145,10 @@
   {
     "text": "Label printers intermittently swapped patient identifiers when the network dropped. Despite usual bedside checks, one mislabelled sample went unnoticed and a transfusion was delayed.",
     "options": [
-      "Discipline the phlebotomist for not double-checking.",
-      "No action if no harm occurred.",
-      "Retrain only the night shift involved.",
-      "Escalate as a system defect: pause affected devices, implement manual verification, investigate IT, and support staff."
+      "Discipline the phlebotomist for not double-checking despite the device fault.",
+      "Take no action provided no harm occurred and routine checks continue.",
+      "Retrain only the night shift involved without addressing the technology issue.",
+      "Escalate as a system defect, pause affected devices and implement manual verification."
     ],
     "correctIndex": 3,
     "note": "Latent IT failure contributed. Address the technology and process; avoid blame while reinforcing interim safety checks."
@@ -157,9 +157,9 @@
     "text": "On a night with multiple emergencies, staffing fell to 50% of the safe roster. Routine observations were missed and a patient deteriorated unnoticed for an hour.",
     "options": [
       "Write up the nurse in charge for negligence.",
-      "Treat as a staffing and workload system failure: document the exception, institute escalation thresholds, and review safe-staffing plans; provide support to the team.",
+      "Treat as a staffing and workload system failure.",
       "Suspend all staff on duty pending investigation.",
-      "Do nothing as pressures are expected."
+      "Consider corrective training to avoid repeating the same mistake."
     ],
     "correctIndex": 1,
     "note": "Latent system conditions and workload led to missed care. Focus on organisational fixes and staff support."
