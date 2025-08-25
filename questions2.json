@@ -15,7 +15,7 @@
     "options": [
       "Issue a formal warning and refer to occupational health.",
       "Refer to mediation services and redeploy temporarily.",
-      "Suspend from clinical duties, initiate disciplinary investigation, and notify the NMC.",
+      "Suspend from clinical duties, initiate disciplinary investigation.",
       "Request a reflective statement and return to supervised practice."
     ],
     "correctIndex": 2,
@@ -26,7 +26,7 @@
     "options": [
       "Hold a peer review panel and issue formal caution.",
       "Suspend temporarily and conduct internal review of the department.",
-      "Initiate dismissal proceedings and report to the GMC for breach of professional ethics.",
+      "Initiate dismissal proceedings and report for breach of professional ethics.",
       "Refer to occupational health for stress-related support."
     ],
     "correctIndex": 2,
@@ -35,7 +35,7 @@
   {
     "text": "A mental health nurse administered double the prescribed dose of antipsychotic medication to a patient. It later emerged the nurse had taken codeine brought from home, unaware of how severely it impaired their alertness. This was the first time the nurse had used it at work and they had no history of substance use or medical oversight.",
     "options": [
-      "Suspend from duty immediately, refer to occupational health and the NMC.",
+      "Suspend from duty immediately and report to occupational health.",
       "Issue a verbal warning and recommend over-the-counter alternatives.",
       "Arrange medicines-management retraining and return to full duties.",
       "Redeploy temporarily to administrative duties without further action."
@@ -47,7 +47,7 @@
     "text": "An experienced radiographer made a series of scanning errors over two shifts. After the second incident, they collapsed at work. It was discovered they were in the early stages of undiagnosed Type 1 diabetes and had been experiencing dizziness and blurred vision, which they hadn’t disclosed or recognized as serious.",
     "options": [
       "Dismiss for repeated errors and failure to declare condition.",
-      "Refer to occupational health, consider temporary restrictions, and monitor recovery.",
+      "Refer to occupational health, consider temporary restrictions  and monitor recovery.",
       "Issue a formal warning and assign a training mentor.",
       "Return to work without adjustments once blood glucose is stabilised."
     ],
@@ -57,7 +57,7 @@
   {
     "text": "A GP misdiagnosed a patient with chest pain as gastric reflux. It was later confirmed that the GP was under the influence of alcohol at the time. This was the first recorded incident and the GP admitted to drinking heavily due to a recent bereavement. There was no record of prior alcohol misuse or a history of health issues.",
     "options": [
-      "Suspend from clinical duties, notify the GMC, and refer to occupational health.",
+      "Suspend from clinical duties, and send to occupational health.",
       "Allow continued practice with weekly supervision and counselling.",
       "Issue a verbal reprimand with a written apology to the patient.",
       "Offer leave of absence and no further action required unless repeated."
@@ -69,7 +69,7 @@
     "text": "A senior physiotherapist misjudged a transfer technique with a stroke patient, resulting in a minor fall. The therapist had a history of epilepsy, well-managed with medication, but later reported feeling ‘foggy’ during the session. Occupational health confirmed a brief focal seizure may have occurred, though the therapist had no prior workplace incidents and no awareness of impairment at the time.",
     "options": [
       "Dismiss for gross misconduct and refer to the HCPC.",
-      "Refer to occupational health, arrange supervision, and consider reasonable adjustments.",
+      "Arrange supervision, and consider reasonable adjustments.",
       "Suspend until seizure-free for six months and report to regulatory body.",
       "Take no action as no serious harm occurred."
     ],
@@ -80,7 +80,7 @@
     "text": "A newly-qualified nurse failed to flush a cannula after IV antibiotic administration, leading to mild infiltration. Protocols clearly stated flushing was mandatory, and the nurse had been trained. She explained she became distracted when the patient’s relative asked for assistance and simply forgot the final step. The omission was caught early, and no significant harm occurred.",
     "options": [
       "Final written warning for failure to follow protocol.",
-      "Refer to the NMC and initiate formal investigation.",
+      "Initiate formal investigation and report to the nursing council.",
       "Provide corrective training, close supervision, and document performance concerns.",
       "Allow return to work without any follow-up action."
     ],
@@ -91,7 +91,7 @@
     "text": "A paediatric registrar discharged a child with abdominal pain, who returned 12 hours later with confirmed appendicitis. The registrar had followed local protocols for observation and discharge, but failed to consider atypical signs noted in the handover. On review, consultants agreed most peers would have questioned the presentation more thoroughly. The registrar had completed all required training and had adequate supervision.",
     "options": [
       "Dismiss the registrar for unsafe discharge decision.",
-      "Refer to the GMC for clinical negligence.",
+      "Suspencion for clinical negligence.",
       "Arrange clinical mentoring and reflective practice under senior supervision.",
       "Take no action, as the child eventually received treatment."
     ],
@@ -101,7 +101,7 @@
     {
     "text": "A staff nurse with well-controlled epilepsy failed to administer rescue medication to a seizing patient. She said she had felt a seizure aura earlier in the shift and was trying to 'push through it.' She told no one, remained on duty, and became disoriented during the incident. The patient required escalation and later ICU care. The nurse had been instructed to alert staff if auras occurred.",
     "options": [
-      "Suspend and refer to occupational health and the NMC.",
+      "Suspend and refer to occupational health.",
       "Dismiss immediately for gross negligence.",
       "Issue written warning and return to full duties.",
       "Take no action due to her medical condition."
@@ -123,7 +123,7 @@
   {
     "text": "A junior doctor inserted a central line without supervision, resulting in a pneumothorax. The trust policy required senior support for such procedures by doctors of their grade. The doctor had completed all training modules and had declined help earlier in the shift. Review confirmed the doctor acted outside competence without pressure or confusion.",
     "options": [
-      "Refer to GMC, restrict from invasive procedures, and initiate formal performance review.",
+      "Restrict from invasive procedures, and initiate formal performance review.",
       "Offer clinical mentoring without any formal sanction.",
       "No further action as complication is a known risk.",
       "Dismiss for breaching scope of practice."
